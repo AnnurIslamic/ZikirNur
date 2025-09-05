@@ -100,13 +100,23 @@
             top: 0;
             z-index: 1000;
         }
-        .menu-icon {
-            font-size: 1.8rem;
+        
+        /* [PERBAIKAN] Utility class untuk tombol ikon agar aksesibel */
+        .icon-btn {
+            background: none;
+            border: none;
+            color: inherit;
             cursor: pointer;
-            margin-right: 1rem;
+            padding: 0;
+            font-size: 1.8rem;
             transition: transform 0.2s ease;
         }
-        .menu-icon:hover { transform: scale(1.1); }
+        .icon-btn:hover { transform: scale(1.1); }
+
+        .menu-icon-btn {
+            margin-right: 1rem;
+        }
+        
         .top-bar-title {
             font-family: 'Playfair Display', serif;
             font-size: 1.8rem;
@@ -200,20 +210,13 @@
             font-size: 0.9rem;
             color: var(--icon-color);
         }
-        .dashboard-header .info-icon {
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-        .dashboard-header .info-icon:hover { color: var(--accent-color); }
-        .dashboard-header .moon-icon {
+        .dashboard-header .info-icon-btn,
+        .dashboard-header .moon-icon-btn {
             font-size: 1.3rem;
             color: var(--icon-color);
-            cursor: pointer;
-            transition: color 0.2s ease;
         }
-        .dashboard-header .moon-icon.dark-mode-active { color: var(--primary-color); }
+        .dashboard-header .info-icon-btn:hover { color: var(--accent-color); }
+        .dashboard-header .moon-icon-btn.dark-mode-active { color: var(--primary-color); }
         .dashboard-header .icon-group {
             display: flex;
             gap: 1rem;
@@ -326,10 +329,9 @@
             font-size: 0.85rem;
             color: var(--icon-color);
             margin-top: 0.5rem;
-            margin-bottom: 1.5rem; /* Beri ruang untuk tombol di bawah */
+            margin-bottom: 1.5rem;
         }
         
-        /* Style untuk 3 Tombol Audio */
         .audio-controls-container {
             display: flex;
             gap: 1rem;
@@ -362,7 +364,6 @@
         .audio-btn.stop-btn:hover {
             background-color: #C62828;
         }
-        /* Utility class untuk menyembunyikan tombol */
         .hidden {
             display: none;
         }
@@ -405,6 +406,14 @@
             font-weight: 500;
             line-height: 1.3;
         }
+        
+        /* [PERBAIKAN] Menambahkan style focus untuk aksesibilitas */
+        .icon-btn:focus-visible, .audio-btn:focus-visible, .shortcut-item:focus-visible, .survey-button:focus-visible, .settings-item a:focus-visible, .store-button:focus-visible, .switch input:focus-visible + .slider {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 3px;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
 
         .survey-button {
             display: flex;
@@ -430,7 +439,6 @@
         }
         .survey-button i { font-size: 1.3rem; }
 
-        /* Styles for Settings & Other sections */
         .settings-container, .explanation-container { padding: 0 0.5rem; }
         .settings-list {
             list-style: none;
@@ -508,15 +516,17 @@
 </head>
 <body>
     <div class="top-bar">
-        <i class="fas fa-bars menu-icon" id="openSidebarBtn"></i>
+        <button class="icon-btn menu-icon-btn" id="openSidebarBtn" aria-label="Buka Menu">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
         <div class="top-bar-title">ZikirNur</div>
     </div>
     <div id="mySidebar" class="sidebar">
         <div class="header-title">Menu Navigasi</div>
         <ul class="sidebar-nav-list">
-            <li><a href="#dashboard" class="nav-link"><i class="fas fa-home"></i> Beranda</a></li>
-            <li><a href="#penjelasan" class="nav-link"><i class="fas fa-book-open"></i> Penjelasan Zikir</a></li>
-            <li><a href="#pengaturan" class="nav-link"><i class="fas fa-cog"></i> Pengaturan</a></li>
+            <li><a href="#dashboard" class="nav-link"><i class="fas fa-home" aria-hidden="true"></i> Beranda</a></li>
+            <li><a href="#penjelasan" class="nav-link"><i class="fas fa-book-open" aria-hidden="true"></i> Penjelasan Zikir</a></li>
+            <li><a href="#pengaturan" class="nav-link"><i class="fas fa-cog" aria-hidden="true"></i> Pengaturan</a></li>
         </ul>
     </div>
     <div class="overlay" id="sidebarOverlay"></div>
@@ -528,13 +538,17 @@
                     <p>Sesuai Sunnah</p>
                 </div>
                 <div class="icon-group">
-                    <i class="fas fa-info-circle info-icon"></i>
-                    <i class="fas fa-moon moon-icon" id="darkModeIcon"></i> 
+                     <button class="icon-btn info-icon-btn" aria-label="Informasi Aplikasi">
+                         <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    </button>
+                     <button class="icon-btn moon-icon-btn" id="darkModeIcon" aria-label="Ganti Mode Tampilan">
+                         <i class="fas fa-moon" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
             <div class="prayer-time-card">
                 <p class="card-location">Medan, Sumatera Utara</p>
-                <p class="card-date" id="currentDateHijri"></p>
+                <p class="card-date" id="currentDateHijri" lang="ar"></p>
                 <div class="prayer-times-grid" id="prayerTimesGrid">
                     <div class="prayer-time-item"><span>Imsak</span><strong id="time-Imsak">--:--</strong></div>
                     <div class="prayer-time-item"><span>Subuh</span><strong id="time-Fajr">--:--</strong></div>
@@ -548,39 +562,39 @@
             <div class="featured-zikir-container">
                 <div class="zikir-card pagi">
                     <audio id="audio-pagi" src="https://raw.githubusercontent.com/AnnurIslamic/ZikirNur2/main/audio/zikir-pagi.mp3"></audio>
-                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-sun" aria-hidden="true"></i>
                     <h4>Dzikir Pagi</h4>
                     <p class="subtitle">Ba'da Subuh</p>
                     
                     <div class="audio-controls-container">
-                        <button class="audio-btn play-btn" data-target="audio-pagi"><i class="fas fa-play"></i></button>
-                        <button class="audio-btn pause-btn hidden" data-target="audio-pagi"><i class="fas fa-pause"></i></button>
-                        <button class="audio-btn stop-btn hidden" data-target="audio-pagi"><i class="fas fa-stop"></i></button>
+                        <button class="audio-btn play-btn" data-target="audio-pagi" aria-label="Putar audio zikir pagi"><i class="fas fa-play" aria-hidden="true"></i></button>
+                        <button class="audio-btn pause-btn hidden" data-target="audio-pagi" aria-label="Jeda audio zikir pagi"><i class="fas fa-pause" aria-hidden="true"></i></button>
+                        <button class="audio-btn stop-btn hidden" data-target="audio-pagi" aria-label="Hentikan audio zikir pagi"><i class="fas fa-stop" aria-hidden="true"></i></button>
                     </div>
                 </div>
                 <div class="zikir-card petang">
                     <audio id="audio-petang" src="https://raw.githubusercontent.com/AnnurIslamic/ZikirNur2/main/audio/zikir-petang.mp3"></audio>
-                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-moon" aria-hidden="true"></i>
                     <h4>Dzikir Petang</h4>
                     <p class="subtitle">Ba'da Ashar</p>
-                     
+                        
                     <div class="audio-controls-container">
-                        <button class="audio-btn play-btn" data-target="audio-petang"><i class="fas fa-play"></i></button>
-                        <button class="audio-btn pause-btn hidden" data-target="audio-petang"><i class="fas fa-pause"></i></button>
-                        <button class="audio-btn stop-btn hidden" data-target="audio-petang"><i class="fas fa-stop"></i></button>
+                        <button class="audio-btn play-btn" data-target="audio-petang" aria-label="Putar audio zikir petang"><i class="fas fa-play" aria-hidden="true"></i></button>
+                        <button class="audio-btn pause-btn hidden" data-target="audio-petang" aria-label="Jeda audio zikir petang"><i class="fas fa-pause" aria-hidden="true"></i></button>
+                        <button class="audio-btn stop-btn hidden" data-target="audio-petang" aria-label="Hentikan audio zikir petang"><i class="fas fa-stop" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
             
             <div class="shortcut-grid">
-                <a href="#" class="shortcut-item"><i class="fas fa-hand-holding-heart shortcut-icon"></i><span>Dzikir Ba'da Sholat</span></a>
-                <a href="#" class="shortcut-item"><i class="fas fa-mosque shortcut-icon"></i><span>Tata Cara Sholat</span></a>
-                <a href="#" class="shortcut-item"><i class="fas fa-book-reader shortcut-icon"></i><span>Doa Para Nabi</span></a>
-                <a href="#" class="shortcut-item"><i class="fas fa-compass shortcut-icon"></i><span>Arah Kiblat</span></a>
-                <a href="#" class="shortcut-item"><i class="fas fa-hands-praying shortcut-icon"></i><span>Doa Harian</span></a>
-                <a href="#" class="shortcut-item"><i class="fas fa-calculator shortcut-icon"></i><span>Tasbih Digital</span></a>
+                <a href="#dzikir-bada-sholat" class="shortcut-item"><i class="fas fa-hand-holding-heart shortcut-icon" aria-hidden="true"></i><span>Dzikir Ba'da Sholat</span></a>
+                <a href="#tata-cara-sholat" class="shortcut-item"><i class="fas fa-mosque shortcut-icon" aria-hidden="true"></i><span>Tata Cara Sholat</span></a>
+                <a href="#doa-nabi" class="shortcut-item"><i class="fas fa-book-reader shortcut-icon" aria-hidden="true"></i><span>Doa Para Nabi</span></a>
+                <a href="#kiblat" class="shortcut-item"><i class="fas fa-compass shortcut-icon" aria-hidden="true"></i><span>Arah Kiblat</span></a>
+                <a href="#doa-harian" class="shortcut-item"><i class="fas fa-hands-praying shortcut-icon" aria-hidden="true"></i><span>Doa Harian</span></a>
+                <a href="#tasbih-digital" class="shortcut-item"><i class="fas fa-calculator shortcut-icon" aria-hidden="true"></i><span>Tasbih Digital</span></a>
             </div>
-            <a href="#" class="survey-button"><i class="fas fa-clipboard-list"></i> ISI SURVEY YUK</a>
+            <a href="#" class="survey-button"><i class="fas fa-clipboard-list" aria-hidden="true"></i> ISI SURVEY YUK</a>
         </section>
 
         <section id="penjelasan-section" class="content-section">
@@ -606,15 +620,30 @@
                         <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider"></span></label>
                     </li>
                 </ul>
+                 <h4 class="settings-list-title">Notifikasi & Izin</h4>
+                <ul class="settings-list">
+                    <li class="settings-item">
+                        <div class="setting-label">Akses Lokasi Otomatis</div>
+                        <label class="switch"><input type="checkbox" id="location-access-toggle"><span class="slider"></span></label>
+                    </li>
+                    <li class="settings-item">
+                        <div class="setting-label">Notifikasi Adzan</div>
+                        <label class="switch"><input type="checkbox" id="notification-toggle"><span class="slider"></span></label>
+                    </li>
+                    <li class="settings-item">
+                        <div class="setting-label">Suara Notifikasi</div>
+                        <label class="switch"><input type="checkbox" id="sound-toggle"><span class="slider"></span></label>
+                    </li>
+                </ul>
                 <h4 class="settings-list-title">Informasi</h4>
                 <ul class="settings-list">
-                    <li class="settings-item"><a href="#"><div class="setting-label">Kebijakan Privasi</div><i class="fas fa-chevron-right chevron-icon"></i></a></li>
-                    <li class="settings-item"><a href="#"><div class="setting-label">Ketentuan Penggunaan</div><i class="fas fa-chevron-right chevron-icon"></i></a></li>
-                    <li class="settings-item"><a href="#"><div class="setting-label">Saran & Masukan</div><i class="fas fa-chevron-right chevron-icon"></i></a></li>
-                    <li class="settings-item"><div class="setting-label">Versi Aplikasi</div><div class="setting-value">v1.0.0 (25)</div></li>
+                    <li class="settings-item"><a href="#"><div class="setting-label">Kebijakan Privasi</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
+                    <li class="settings-item"><a href="#"><div class="setting-label">Ketentuan Penggunaan</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
+                    <li class="settings-item"><a href="#"><div class="setting-label">Saran & Masukan</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
+                    <li class="settings-item"><div class="setting-label">Versi Aplikasi</div><div class="setting-value">v1.2.0 (27)</div></li>
                 </ul>
             </div>
-            <a href="#" class="store-button"><i class="fab fa-google-play"></i> Unduh di Google PlayStore</a>
+            <a href="#" class="store-button"><i class="fab fa-google-play" aria-hidden="true"></i> Unduh di Google PlayStore</a>
         </section>
     </main>
     <footer>
@@ -632,6 +661,11 @@
             const darkModeToggle = document.getElementById('dark-mode-toggle');
             const autoModeToggle = document.getElementById('auto-mode-toggle');
             const darkModeIcon = document.getElementById('darkModeIcon');
+            // [PENAMBAHAN] Elemen untuk izin
+            const locationToggle = document.getElementById('location-access-toggle');
+            const notificationToggle = document.getElementById('notification-toggle');
+            const soundToggle = document.getElementById('sound-toggle');
+            const locationDisplay = document.querySelector('.card-location');
 
             // --- Sidebar Logic ---
             function openSidebar() {
@@ -667,12 +701,13 @@
             // --- Dark Mode Logic ---
             let autoModeInterval;
             function setMode(isDark) {
+                const moonIconBtn = document.getElementById('darkModeIcon');
                 if (isDark) {
                     document.body.classList.add('dark-mode');
-                    darkModeIcon.classList.add('dark-mode-active');
+                    moonIconBtn.classList.add('dark-mode-active');
                 } else {
                     document.body.classList.remove('dark-mode');
-                    darkModeIcon.classList.remove('dark-mode-active');
+                    moonIconBtn.classList.remove('dark-mode-active');
                 }
             }
             function checkAutoMode() {
@@ -724,13 +759,135 @@
             });
             applySavedMode();
 
+            // --- [PENAMBAHAN] Permission Logic ---
+            locationToggle.addEventListener('change', () => {
+                if (locationToggle.checked) {
+                    requestLocationAccess();
+                } else {
+                    localStorage.removeItem('userLocation');
+                    localStorage.setItem('locationAccess', 'denied');
+                    locationDisplay.textContent = 'Medan, Sumatera Utara';
+                    fetchPrayerTimes(); // Revert to default
+                }
+            });
+
+            notificationToggle.addEventListener('change', () => {
+                if (notificationToggle.checked) {
+                    requestNotificationPermission();
+                } else {
+                    localStorage.setItem('notificationPermission', 'denied');
+                    soundToggle.checked = false;
+                    soundToggle.disabled = true;
+                    localStorage.setItem('soundPermission', 'denied');
+                }
+            });
+
+            soundToggle.addEventListener('change', () => {
+                localStorage.setItem('soundPermission', soundToggle.checked ? 'granted' : 'denied');
+            });
+            
+            function requestLocationAccess() {
+                if ('geolocation' in navigator) {
+                    locationDisplay.textContent = 'Mendapatkan lokasi...';
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            const { latitude, longitude } = position.coords;
+                            localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
+                            localStorage.setItem('locationAccess', 'granted');
+                            fetchCityName(latitude, longitude);
+                            fetchPrayerTimes(latitude, longitude);
+                        },
+                        error => {
+                            console.error("Error getting location:", error);
+                            alert('Akses lokasi ditolak. Menampilkan waktu untuk lokasi default.');
+                            locationToggle.checked = false;
+                            localStorage.setItem('locationAccess', 'denied');
+                            locationDisplay.textContent = 'Medan, Sumatera Utara';
+                        }
+                    );
+                } else {
+                    alert('Geolocation tidak didukung oleh browser Anda.');
+                    locationToggle.checked = false;
+                }
+            }
+
+            async function fetchCityName(lat, lon) {
+                try {
+                    const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`);
+                    if (!response.ok) throw new Error('Failed to fetch city name');
+                    const data = await response.json();
+                    const city = data.city || data.locality || 'Lokasi Anda';
+                    const province = data.principalSubdivision || '';
+                    locationDisplay.textContent = `${city}, ${province}`;
+                } catch (error) {
+                    console.error("Gagal mendapatkan nama kota:", error);
+                    locationDisplay.textContent = 'Lokasi Anda';
+                }
+            }
+
+            function requestNotificationPermission() {
+                if ('Notification' in window) {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            localStorage.setItem('notificationPermission', 'granted');
+                            soundToggle.disabled = false;
+                            new Notification('ZikirNur', {
+                                body: 'Terima kasih! Notifikasi adzan telah diaktifkan.',
+                                icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png' // Example icon
+                            });
+                        } else {
+                            alert('Anda telah menolak izin notifikasi.');
+                            notificationToggle.checked = false;
+                            soundToggle.disabled = true;
+                            localStorage.setItem('notificationPermission', 'denied');
+                        }
+                    });
+                } else {
+                    alert('Notifikasi tidak didukung oleh browser ini.');
+                    notificationToggle.checked = false;
+                }
+            }
+
+            function initializePermissions() {
+                // Location
+                if (localStorage.getItem('locationAccess') === 'granted') {
+                    locationToggle.checked = true;
+                    const savedLocation = JSON.parse(localStorage.getItem('userLocation'));
+                    if (savedLocation) {
+                        fetchCityName(savedLocation.latitude, savedLocation.longitude);
+                        fetchPrayerTimes(savedLocation.latitude, savedLocation.longitude);
+                    }
+                } else {
+                    locationToggle.checked = false;
+                    fetchPrayerTimes(); // Fetch default
+                }
+                // Notifications
+                if (localStorage.getItem('notificationPermission') === 'granted') {
+                    notificationToggle.checked = true;
+                    soundToggle.disabled = false;
+                    soundToggle.checked = (localStorage.getItem('soundPermission') === 'granted');
+                } else {
+                    notificationToggle.checked = false;
+                    soundToggle.disabled = true;
+                    soundToggle.checked = false;
+                }
+            }
+
             // --- Prayer Times API ---
-            async function fetchPrayerTimes() {
-                const METHOD = 11;
+            async function fetchPrayerTimes(lat = null, lon = null) {
                 const ADJUSTMENT = 2;
-                const apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=Medan&country=Indonesia&method=${METHOD}`;
+                let apiUrl;
+                if (lat && lon) {
+                    apiUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=11`;
+                } else {
+                    apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=Medan&country=Indonesia&method=11`;
+                }
+                
                 try {
                     const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     const data = await response.json();
                     if (data.code === 200) {
                         const times = data.data.timings;
@@ -753,6 +910,10 @@
                     }
                 } catch (error) {
                     console.error("Gagal mengambil data waktu sholat:", error);
+                    const prayerGrid = document.getElementById('prayerTimesGrid');
+                    if(prayerGrid) {
+                        prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`;
+                    }
                 }
             }
             function highlightNextPrayer() {
@@ -762,76 +923,92 @@
                 let nextPrayerFound = false;
                 document.querySelectorAll('.prayer-time-item').forEach(item => item.classList.remove('next-prayer'));
                 for (const prayer of prayerOrder) {
-                    const timeStr = document.getElementById(`time-${prayer}`).textContent;
+                    const timeEl = document.getElementById(`time-${prayer}`);
+                    if (!timeEl) continue;
+                    const timeStr = timeEl.textContent;
                     if (timeStr === '--:--') continue;
                     const [h, m] = timeStr.split(':').map(Number);
                     const prayerTime = h * 60 + m;
                     if (currentTime < prayerTime) {
-                        document.getElementById(`time-${prayer}`).closest('.prayer-time-item').classList.add('next-prayer');
+                        timeEl.closest('.prayer-time-item').classList.add('next-prayer');
                         nextPrayerFound = true;
                         break;
                     }
                 }
                 if (!nextPrayerFound) {
-                    document.getElementById('time-Fajr').closest('.prayer-time-item').classList.add('next-prayer');
+                     const fajrItem = document.getElementById('time-Fajr');
+                     if(fajrItem) fajrItem.closest('.prayer-time-item').classList.add('next-prayer');
                 }
             }
-            fetchPrayerTimes();
+
+            initializePermissions(); // [MODIFIKASI] Panggil fungsi inisialisasi izin
             setInterval(highlightNextPrayer, 30000);
 
-            // --- Logika Audio Player dengan 3 Tombol ---
+            // --- [PERBAIKAN] Logika Audio Player dengan Event Delegation ---
             const allAudios = document.querySelectorAll('audio');
-            function resetAllPlayersUI(exceptAudioId) {
-                const allContainers = document.querySelectorAll('.audio-controls-container');
-                allContainers.forEach(container => {
-                    const audioId = container.querySelector('.play-btn').dataset.target;
-                    if (audioId !== exceptAudioId) {
+            const audioContainer = document.querySelector('.featured-zikir-container');
+
+            function stopAllAudios(exceptAudio) {
+                allAudios.forEach(audio => {
+                    if (audio !== exceptAudio) {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }
+                });
+            }
+
+            function resetAllPlayersUI(exceptContainer) {
+                document.querySelectorAll('.audio-controls-container').forEach(container => {
+                    if (container !== exceptContainer) {
                         container.querySelector('.play-btn').classList.remove('hidden');
                         container.querySelector('.pause-btn').classList.add('hidden');
                         container.querySelector('.stop-btn').classList.add('hidden');
                     }
                 });
             }
-            function stopAllAudios(exceptAudioId) {
-                allAudios.forEach(audio => {
-                    if (audio.id !== exceptAudioId) {
-                        audio.pause();
-                        audio.currentTime = 0;
-                    }
-                });
-            }
-            document.querySelectorAll('.play-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
+
+            audioContainer.addEventListener('click', (e) => {
+                const playBtn = e.target.closest('.play-btn');
+                const pauseBtn = e.target.closest('.pause-btn');
+                const stopBtn = e.target.closest('.stop-btn');
+                
+                if (playBtn) {
+                    const targetId = playBtn.dataset.target;
                     const audio = document.getElementById(targetId);
-                    stopAllAudios(targetId);
-                    resetAllPlayersUI(targetId);
+                    const container = playBtn.parentElement;
+
+                    stopAllAudios(audio);
+                    resetAllPlayersUI(container);
+
                     audio.play();
-                    button.classList.add('hidden');
-                    button.parentElement.querySelector('.pause-btn').classList.remove('hidden');
-                    button.parentElement.querySelector('.stop-btn').classList.remove('hidden');
-                });
-            });
-            document.querySelectorAll('.pause-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
+                    playBtn.classList.add('hidden');
+                    container.querySelector('.pause-btn').classList.remove('hidden');
+                    container.querySelector('.stop-btn').classList.remove('hidden');
+                }
+
+                if (pauseBtn) {
+                    const targetId = pauseBtn.dataset.target;
                     const audio = document.getElementById(targetId);
+                    const container = pauseBtn.parentElement;
+                    
                     audio.pause();
-                    button.classList.add('hidden');
-                    button.parentElement.querySelector('.play-btn').classList.remove('hidden');
-                });
-            });
-            document.querySelectorAll('.stop-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
+                    pauseBtn.classList.add('hidden');
+                    container.querySelector('.play-btn').classList.remove('hidden');
+                }
+                
+                if (stopBtn) {
+                    const targetId = stopBtn.dataset.target;
                     const audio = document.getElementById(targetId);
+                    const container = stopBtn.parentElement;
+                    
                     audio.pause();
                     audio.currentTime = 0;
-                    button.classList.add('hidden');
-                    button.parentElement.querySelector('.pause-btn').classList.add('hidden');
-                    button.parentElement.querySelector('.play-btn').classList.remove('hidden');
-                });
+                    stopBtn.classList.add('hidden');
+                    container.querySelector('.pause-btn').classList.add('hidden');
+                    container.querySelector('.play-btn').classList.remove('hidden');
+                }
             });
+            
             allAudios.forEach(audio => {
                 audio.addEventListener('ended', () => {
                     const container = document.querySelector(`.play-btn[data-target="${audio.id}"]`).parentElement;
