@@ -414,7 +414,6 @@
             box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
         }
 
-
         .survey-button {
             display: flex;
             align-items: center;
@@ -490,6 +489,97 @@
 
         footer { text-align: center; padding: 1.5rem; background-color: var(--primary-color); color: white; margin-top: 3.5rem; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
         
+        /* [PENAMBAHAN BARU] Styling untuk Pop-up Kustom */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .popup-content {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.3s ease;
+        }
+        .popup-overlay.active .popup-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .popup-icon {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .popup-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-color);
+        }
+        .popup-message {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: var(--icon-color);
+        }
+        .popup-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .popup-btn {
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-grow: 1;
+        }
+        .popup-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .popup-btn.primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        .popup-btn.secondary {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+        }
+        .dark-mode .popup-btn.secondary {
+             color: var(--text-color);
+        }
+        .popup-btn.secondary:hover {
+            background-color: var(--border-color);
+        }
+
         @media (max-width: 768px) {
             .top-bar-title, .sidebar .header-title { font-size: 1.6rem; }
             h2 { font-size: 1.8rem; }
@@ -650,6 +740,19 @@
         <p>&copy; 2025 ZikirNur</p>
     </footer>
 
+    <div id="permission-popup" class="popup-overlay">
+        <div class="popup-content">
+            <div id="popup-icon-container" class="popup-icon"></div>
+            <h3 id="popup-title" class="popup-title"></h3>
+            <p id="popup-message" class="popup-message"></p>
+            <div class="popup-actions">
+                <button id="popup-deny-btn" class="popup-btn secondary">Tolak</button>
+                <button id="popup-allow-btn" class="popup-btn primary">Izinkan</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- Elements ---
@@ -661,11 +764,18 @@
             const darkModeToggle = document.getElementById('dark-mode-toggle');
             const autoModeToggle = document.getElementById('auto-mode-toggle');
             const darkModeIcon = document.getElementById('darkModeIcon');
-            // [PENAMBAHAN] Elemen untuk izin
             const locationToggle = document.getElementById('location-access-toggle');
             const notificationToggle = document.getElementById('notification-toggle');
             const soundToggle = document.getElementById('sound-toggle');
             const locationDisplay = document.querySelector('.card-location');
+            
+            // [PENAMBAHAN BARU] Elemen Pop-up
+            const popup = document.getElementById('permission-popup');
+            const popupIcon = document.getElementById('popup-icon-container');
+            const popupTitle = document.getElementById('popup-title');
+            const popupMessage = document.getElementById('popup-message');
+            const popupAllowBtn = document.getElementById('popup-allow-btn');
+            const popupDenyBtn = document.getElementById('popup-deny-btn');
 
             // --- Sidebar Logic ---
             function openSidebar() {
@@ -759,26 +869,81 @@
             });
             applySavedMode();
 
-            // --- [PENAMBAHAN] Permission Logic ---
-            locationToggle.addEventListener('change', () => {
-                if (locationToggle.checked) {
-                    requestLocationAccess();
+            // --- [MODIFIKASI] Permission Logic dengan Pop-up Kustom ---
+
+            // Fungsi untuk menampilkan pop-up
+            function showPermissionPopup({ title, message, iconHtml, onAllow, onDeny }) {
+                popupTitle.textContent = title;
+                popupMessage.textContent = message;
+                popupIcon.innerHTML = iconHtml;
+
+                // Clone dan replace untuk menghapus event listener lama
+                const newAllowBtn = popupAllowBtn.cloneNode(true);
+                popupAllowBtn.parentNode.replaceChild(newAllowBtn, popupAllowBtn);
+                
+                const newDenyBtn = popupDenyBtn.cloneNode(true);
+                popupDenyBtn.parentNode.replaceChild(newDenyBtn, popupDenyBtn);
+
+                newAllowBtn.addEventListener('click', () => {
+                    onAllow();
+                    hidePermissionPopup();
+                });
+                newDenyBtn.addEventListener('click', () => {
+                    onDeny();
+                    hidePermissionPopup();
+                });
+
+                popup.classList.add('active');
+            }
+            // Fungsi untuk menyembunyikan pop-up
+            function hidePermissionPopup() {
+                popup.classList.remove('active');
+            }
+
+
+            locationToggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    e.preventDefault(); // Mencegah toggle langsung aktif
+                    showPermissionPopup({
+                        title: 'Izin Lokasi',
+                        message: 'ZikirNur memerlukan akses lokasi Anda untuk menampilkan waktu sholat yang akurat di wilayah Anda. Data lokasi tidak akan dibagikan.',
+                        iconHtml: '<i class="fas fa-map-marker-alt"></i>',
+                        onAllow: () => {
+                           locationToggle.checked = true; // Aktifkan toggle
+                           requestLocationAccess();
+                        },
+                        onDeny: () => {
+                           locationToggle.checked = false; // Batalkan aktivasi
+                        }
+                    });
                 } else {
-                    localStorage.removeItem('userLocation');
-                    localStorage.setItem('locationAccess', 'denied');
-                    locationDisplay.textContent = 'Medan, Sumatera Utara';
-                    fetchPrayerTimes(); // Revert to default
+                     localStorage.removeItem('userLocation');
+                     localStorage.setItem('locationAccess', 'denied');
+                     locationDisplay.textContent = 'Medan, Sumatera Utara';
+                     fetchPrayerTimes(); // Kembali ke default
                 }
             });
 
-            notificationToggle.addEventListener('change', () => {
-                if (notificationToggle.checked) {
-                    requestNotificationPermission();
+            notificationToggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    e.preventDefault();
+                    showPermissionPopup({
+                        title: 'Izin Notifikasi',
+                        message: 'Izinkan notifikasi agar kami dapat mengingatkan Anda saat waktu sholat tiba (adzan). Anda juga dapat mengaktifkan suara notifikasi setelah ini.',
+                        iconHtml: '<i class="fas fa-bell"></i>',
+                        onAllow: () => {
+                            notificationToggle.checked = true;
+                            requestNotificationPermission();
+                        },
+                        onDeny: () => {
+                            notificationToggle.checked = false;
+                        }
+                    });
                 } else {
-                    localStorage.setItem('notificationPermission', 'denied');
-                    soundToggle.checked = false;
-                    soundToggle.disabled = true;
-                    localStorage.setItem('soundPermission', 'denied');
+                     localStorage.setItem('notificationPermission', 'denied');
+                     soundToggle.checked = false;
+                     soundToggle.disabled = true;
+                     localStorage.setItem('soundPermission', 'denied');
                 }
             });
 
@@ -799,7 +964,6 @@
                         },
                         error => {
                             console.error("Error getting location:", error);
-                            alert('Akses lokasi ditolak. Menampilkan waktu untuk lokasi default.');
                             locationToggle.checked = false;
                             localStorage.setItem('locationAccess', 'denied');
                             locationDisplay.textContent = 'Medan, Sumatera Utara';
@@ -836,7 +1000,6 @@
                                 icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png' // Example icon
                             });
                         } else {
-                            alert('Anda telah menolak izin notifikasi.');
                             notificationToggle.checked = false;
                             soundToggle.disabled = true;
                             localStorage.setItem('notificationPermission', 'denied');
@@ -862,7 +1025,7 @@
                     fetchPrayerTimes(); // Fetch default
                 }
                 // Notifications
-                if (localStorage.getItem('notificationPermission') === 'granted') {
+                if (localStorage.getItem('notificationPermission') === 'granted' && Notification.permission === 'granted') {
                     notificationToggle.checked = true;
                     soundToggle.disabled = false;
                     soundToggle.checked = (localStorage.getItem('soundPermission') === 'granted');
@@ -941,10 +1104,10 @@
                 }
             }
 
-            initializePermissions(); // [MODIFIKASI] Panggil fungsi inisialisasi izin
+            initializePermissions();
             setInterval(highlightNextPrayer, 30000);
 
-            // --- [PERBAIKAN] Logika Audio Player dengan Event Delegation ---
+            // --- Logika Audio Player ---
             const allAudios = document.querySelectorAll('audio');
             const audioContainer = document.querySelector('.featured-zikir-container');
 
@@ -1020,4 +1183,4 @@
         });
     </script>
 </body>
-</html>
+                                                                                                                                   </html>
