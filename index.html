@@ -23,7 +23,7 @@
             --primary-color: #00796B; /* Teal */
             --secondary-color: #4CAF50; /* Green */
             --accent-color: #FFC107; /* Amber for highlight */
-            --bg-color-light: #F0F4F8; /* Light blue-grey */
+            --bg-color-light: #FDF5EC; /* Light Beige from screenshots */
             --text-color-light: #2C3E50; /* Darker text */
             --card-bg-light: #FFFFFF;
             --dark-green: #004D40;
@@ -88,7 +88,21 @@
             border-radius: 2px;
         }
         .dark-mode h2 { color: var(--primary-color); }
-
+        .explanation-container h4 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        .explanation-container ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+        .explanation-container ul li {
+            margin-bottom: 0.5rem;
+        }
+        
         .top-bar {
             background-color: var(--primary-color);
             color: white;
@@ -101,7 +115,6 @@
             z-index: 1000;
         }
         
-        /* [PERBAIKAN] Utility class untuk tombol ikon agar aksesibel */
         .icon-btn {
             background: none;
             border: none;
@@ -312,7 +325,7 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
-        .zikir-card > i { /* Use > to target only the main icon */
+        .zikir-card > i {
             font-size: 3rem;
             margin-bottom: 1rem;
             transition: color 0.2s ease;
@@ -359,7 +372,7 @@
             transform: scale(1.1);
         }
         .audio-btn.stop-btn {
-            background-color: #E53935; /* Warna merah untuk stop */
+            background-color: #E53935;
         }
         .audio-btn.stop-btn:hover {
             background-color: #C62828;
@@ -407,7 +420,6 @@
             line-height: 1.3;
         }
         
-        /* [PERBAIKAN] Menambahkan style focus untuk aksesibilitas */
         .icon-btn:focus-visible, .audio-btn:focus-visible, .shortcut-item:focus-visible, .survey-button:focus-visible, .settings-item a:focus-visible, .store-button:focus-visible, .switch input:focus-visible + .slider {
             outline: 3px solid var(--accent-color);
             outline-offset: 3px;
@@ -489,7 +501,6 @@
 
         footer { text-align: center; padding: 1.5rem; background-color: var(--primary-color); color: white; margin-top: 3.5rem; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
         
-        /* [PENAMBAHAN BARU] Styling untuk Pop-up Kustom */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -579,6 +590,15 @@
         .popup-btn.secondary:hover {
             background-color: var(--border-color);
         }
+        
+        .refreshing {
+            animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         @media (max-width: 768px) {
             .top-bar-title, .sidebar .header-title { font-size: 1.6rem; }
@@ -601,6 +621,240 @@
             .survey-button { font-size: 1rem; }
             .settings-item { flex-direction: column; align-items: flex-start; gap: 0.8rem; padding: 1rem 1.2rem; }
             .mode-toggle-container { width: 100%; justify-content: space-between; }
+        }
+
+        /* === CSS untuk Dzikir Ba'da Sholat === */
+        .dhikr-container-new { position: relative; width: 100%; max-width: 450px; margin: 0 auto; overflow: hidden; }
+        .dhikr-slider-new { display: flex; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .dhikr-slide-new { min-width: 100%; box-sizing: border-box; padding: 0 10px; }
+        .dhikr-progress { padding: 0 5px; margin-bottom: 0.8rem; }
+        .progress-text { font-size: 0.9rem; font-weight: 500; color: var(--icon-color); margin-bottom: 0.5rem; display: block; }
+        .progress-bar-container { width: 100%; height: 6px; background-color: var(--border-color); border-radius: 6px; overflow: hidden; }
+        .progress-bar-fill { width: 0%; height: 100%; background-color: var(--primary-color); border-radius: 6px; transition: width 0.4s ease; }
+        .dhikr-card-new { background: linear-gradient(145deg, var(--card-bg) 0%, var(--bg-color) 100%); border-radius: 24px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; }
+        .dark-mode .dhikr-card-new { background: linear-gradient(145deg, var(--card-bg) 0%, #171e2a 100%); }
+        .dhikr-title-new { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; color: var(--text-color); margin-bottom: 1.5rem; }
+        .dhikr-arabic-new { font-size: 3rem; font-weight: 500; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.5; }
+        .dark-mode .dhikr-arabic-new { color: var(--accent-color); }
+        .dhikr-translation-new { font-size: 1rem; color: var(--icon-color); margin-bottom: 2rem; font-style: italic; }
+        .counter-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .progress-counter { position: relative; width: 120px; height: 120px; border-radius: 50%; background-color: var(--card-bg); border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.2s ease; }
+        .progress-counter:active { transform: scale(0.95); }
+        .progress-ring { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+        .progress-ring__bg { stroke: var(--border-color); }
+        .progress-ring__circle { stroke: var(--primary-color); stroke-linecap: round; transition: stroke-dashoffset 0.3s linear; }
+        .count-display-new { font-size: 2.5rem; font-weight: 700; color: var(--text-color); }
+        .reset-btn-new { background: none; border: none; color: var(--icon-color); cursor: pointer; font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s ease; }
+        .reset-btn-new:hover { opacity: 1; }
+        .target-count-new { font-size: 0.9rem; font-weight: 500; color: var(--text-color); background-color: var(--bg-color); padding: 0.3rem 1rem; border-radius: 15px; }
+        .slider-nav-new { position: absolute; top: 50%; transform: translateY(-50%); background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; color: var(--icon-color); font-size: 1.1rem; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; }
+        .slider-nav-new:hover { background-color: var(--primary-color); color: white; }
+        .slider-nav-new.prev { left: -15px; }
+        .slider-nav-new.next { right: -15px; }
+        
+        /* === CSS untuk TATA CARA SHOLAT & DOA NABI === */
+        .prayer-guide-container { display: flex; flex-direction: column; gap: 1rem; }
+        .prayer-step { background-color: var(--card-bg); border-radius: 15px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
+        .step-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 1.5rem; background-color: transparent; border: none; cursor: pointer; text-align: left; font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 600; color: var(--text-color); }
+        .step-header:hover { background-color: var(--bg-color); }
+        .step-icon { font-size: 1.2rem; color: var(--primary-color); transition: transform 0.3s ease; }
+        .step-header.active .step-icon { transform: rotate(45deg); }
+        .step-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; padding: 0 1.5rem; }
+        .step-content .content-wrapper { padding: 1.5rem 0; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.2rem; }
+        .step-content p { margin: 0; }
+        .arabic-text { font-size: 1.8rem; color: var(--primary-color); text-align: right; line-height: 1.8; }
+        .dark-mode .arabic-text { color: var(--accent-color); }
+        .transliteration-text { font-size: 1rem; color: var(--text-color); font-style: italic; font-weight: 500; }
+        .translation-text { font-size: 0.9rem; color: var(--icon-color); }
+        .step-note { font-size: 0.9rem; padding: 0.8rem 1rem; background-color: var(--bg-color); border-radius: 10px; border-left: 4px solid var(--accent-color); }
+        
+        /* === CSS untuk ARAH KIBLAT === */
+        .kiblat-container { display: flex; flex-direction: column; align-items: center; gap: 2rem; padding: 1rem 0; }
+        #kiblat-permission-prompt { text-align: center; background-color: var(--card-bg); padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        #kiblat-permission-prompt p { margin-bottom: 1rem; }
+        #kiblat-permission-btn { border: none; background-color: var(--primary-color); color: white; padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .compass-ui-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .compass { position: relative; width: 280px; height: 280px; }
+        .compass-circle { width: 100%; height: 100%; background-color: var(--card-bg); border: 5px solid var(--primary-color); border-radius: 50%; box-shadow: 0 5px 20px rgba(0,0,0,0.1); position: relative; transition: border-color 0.4s ease, box-shadow 0.4s ease; }
+        .compass-circle.aligned { border-color: var(--secondary-color); box-shadow: 0 0 25px var(--secondary-color); }
+        .compass-rose { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.2s linear; }
+        .degree-mark { position: absolute; font-size: 1.3rem; font-weight: bold; color: var(--text-color); }
+        .degree-mark.north { top: 10px; left: 50%; transform: translateX(-50%); }
+        .degree-mark.east { top: 50%; right: 10px; transform: translateY(-50%); }
+        .degree-mark.south { bottom: 10px; left: 50%; transform: translateX(-50%); }
+        .degree-mark.west { top: 50%; left: 10px; transform: translateY(-50%); }
+        .qibla-pointer { position: absolute; top: -35px; left: 50%; transform-origin: center 175px; /* 140px (radius) + 35px (offset) */ z-index: 4; transition: transform 0.2s linear; }
+        .kaaba-icon { font-size: 2.5rem; color: var(--accent-color); text-shadow: 0 0 10px rgba(0,0,0,0.3); }
+        .lubber-line { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 30px; background-color: #e74c3c; border-radius: 2px; z-index: 3; }
+        .kiblat-info-box { text-align: center; background-color: var(--card-bg); padding: 1.2rem; border-radius: 15px; width: 100%; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .kiblat-info-box .direction-degree { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); min-height: 2em; }
+        .kiblat-info-box .calibration-info { font-size: 0.8rem; color: var(--icon-color); line-height: 1.4; margin-top: 0.5rem; }
+
+        /* === CSS untuk TASBIH DIGITAL === */
+        #tasbih-digital-section {
+            --tasbih-input-bg: #EFEBE9;
+            --tasbih-btn-bg: #C3A381;
+            --tasbih-text-color: #5D4037;
+            --tasbih-counter-bg: #FFFFFF;
+            --tasbih-counter-border: #E0E0E0;
+        }
+
+        .dark-mode #tasbih-digital-section {
+            --tasbih-input-bg: #3B4455;
+            --tasbih-btn-bg: #8E6E53;
+            --tasbih-text-color: var(--text-color);
+            --tasbih-counter-bg: #2D3748;
+            --tasbih-counter-border: #4A5568;
+        }
+
+        .tasbih-container {
+            max-width: 400px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: transparent;
+            border-radius: 15px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .tasbih-setup-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .tasbih-form-group {
+            width: 100%;
+        }
+
+        #dzikir-select,
+        #custom-dzikir-input,
+        #dzikir-target {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--tasbih-input-bg);
+            background-color: var(--tasbih-input-bg);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--tasbih-text-color);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        #dzikir-select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235D4037' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+            cursor: pointer;
+        }
+
+        #dzikir-target::placeholder,
+        #custom-dzikir-input::placeholder {
+            color: #9E9E9E;
+        }
+
+        .tasbih-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--tasbih-btn-bg);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .tasbih-btn:hover {
+            background-color: #b1906f; 
+        }
+        .dark-mode .tasbih-btn:hover {
+            background-color: #7d5e42;
+        }
+
+        .tasbih-counter-container {
+            text-align: center;
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        #display-dzikir-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--tasbih-text-color);
+            margin: 0;
+        }
+
+        #display-dzikir-target {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--icon-color);
+            margin-top: -1rem;
+        }
+
+        .counter-ui {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--tasbih-counter-bg);
+            border: 1px solid var(--tasbih-counter-border);
+            border-radius: 50px;
+            padding: 0.5rem;
+            width: 100%;
+            max-width: 280px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        #tasbih-count-display {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--tasbih-text-color);
+            flex-grow: 1;
+        }
+
+        .tasbih-control-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--tasbih-text-color);
+            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease;
+        }
+        .tasbih-control-btn:active {
+            transform: scale(0.9);
+        }
+
+        #reset-setup-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        #reset-setup-link:hover {
+            border-bottom-color: var(--primary-color);
+        }
+
+
+        @media (max-width: 480px) {
+            .slider-nav-new.prev { left: -5px; }
+            .slider-nav-new.next { right: -5px; }
+            .dhikr-card-new { padding: 1.5rem; }
+            .dhikr-arabic-new { font-size: 2.5rem; }
+            .step-header { padding: 1rem 1.2rem; font-size: 1rem; }
+            .step-content { padding: 0 1.2rem; }
+            .arabic-text { font-size: 1.6rem; }
+            .compass { width: 240px; height: 240px; }
+            .qibla-pointer { transform-origin: center 155px; /* 120px radius + 35px offset */ }
         }
     </style>
 </head>
@@ -628,11 +882,11 @@
                     <p>Sesuai Sunnah</p>
                 </div>
                 <div class="icon-group">
-                     <button class="icon-btn info-icon-btn" aria-label="Informasi Aplikasi">
-                         <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    <button id="infoToSettingsBtn" class="icon-btn info-icon-btn" aria-label="Informasi Aplikasi">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
                     </button>
-                     <button class="icon-btn moon-icon-btn" id="darkModeIcon" aria-label="Ganti Mode Tampilan">
-                         <i class="fas fa-moon" aria-hidden="true"></i>
+                    <button class="icon-btn moon-icon-btn" id="darkModeIcon" aria-label="Ganti Mode Tampilan">
+                        <i class="fas fa-moon" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -677,14 +931,297 @@
             </div>
             
             <div class="shortcut-grid">
-                <a href="#dzikir-bada-sholat" class="shortcut-item"><i class="fas fa-hand-holding-heart shortcut-icon" aria-hidden="true"></i><span>Dzikir Ba'da Sholat</span></a>
-                <a href="#tata-cara-sholat" class="shortcut-item"><i class="fas fa-mosque shortcut-icon" aria-hidden="true"></i><span>Tata Cara Sholat</span></a>
-                <a href="#doa-nabi" class="shortcut-item"><i class="fas fa-book-reader shortcut-icon" aria-hidden="true"></i><span>Doa Para Nabi</span></a>
-                <a href="#kiblat" class="shortcut-item"><i class="fas fa-compass shortcut-icon" aria-hidden="true"></i><span>Arah Kiblat</span></a>
-                <a href="#doa-harian" class="shortcut-item"><i class="fas fa-hands-praying shortcut-icon" aria-hidden="true"></i><span>Doa Harian</span></a>
-                <a href="#tasbih-digital" class="shortcut-item"><i class="fas fa-calculator shortcut-icon" aria-hidden="true"></i><span>Tasbih Digital</span></a>
+                <a href="#dzikir-bada-sholat" class="shortcut-item nav-shortcut"><i class="fas fa-hand-holding-heart shortcut-icon" aria-hidden="true"></i><span>Dzikir Ba'da Sholat</span></a>
+                <a href="#tata-cara-sholat" class="shortcut-item nav-shortcut"><i class="fas fa-mosque shortcut-icon" aria-hidden="true"></i><span>Tata Cara Sholat</span></a>
+                <a href="#doa-nabi" class="shortcut-item nav-shortcut"><i class="fas fa-book-reader shortcut-icon" aria-hidden="true"></i><span>Doa Para Nabi</span></a>
+                <a href="#kiblat" class="shortcut-item nav-shortcut"><i class="fas fa-compass shortcut-icon" aria-hidden="true"></i><span>Arah Kiblat</span></a>
+                <a href="#doa-harian" class="shortcut-item nav-shortcut"><i class="fas fa-hands-praying shortcut-icon" aria-hidden="true"></i><span>Doa Harian</span></a>
+                <a href="#tasbih-digital" class="shortcut-item nav-shortcut"><i class="fas fa-calculator shortcut-icon" aria-hidden="true"></i><span>Penghitung Digital</span></a>
             </div>
             <a href="#" class="survey-button"><i class="fas fa-clipboard-list" aria-hidden="true"></i> ISI SURVEY YUK</a>
+        </section>
+        
+        <section id="dzikir-bada-sholat-section" class="content-section">
+            <div class="dhikr-container-new">
+                <div class="dhikr-slider-new">
+                    <div class="dhikr-slide-new">
+                        <div class="dhikr-progress"> <span class="progress-text">Dzikir 1 dari 7</span> <div class="progress-bar-container"> <div class="progress-bar-fill"></div> </div> </div>
+                        <div class="dhikr-card-new">
+                            <h3 class="dhikr-title-new">Membaca Istighfar</h3> <p class="dhikr-arabic-new">أَسْتَغْفِرُ اللهَ</p> <p class="dhikr-translation-new">"Aku memohon ampun kepada Allah."</p>
+                            <div class="counter-wrapper">
+                                <button class="progress-counter" data-max="3" aria-label="Hitung Dzikir">
+                                    <svg class="progress-ring" width="120" height="120"> <circle class="progress-ring__bg" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> </svg>
+                                    <span class="count-display-new">0</span>
+                                </button> <button class="reset-btn-new"><i class="fas fa-sync-alt"></i> Reset</button>
+                            </div> <span class="target-count-new">Target: 3x</span>
+                        </div>
+                    </div>
+                    <div class="dhikr-slide-new">
+                        <div class="dhikr-progress"> <span class="progress-text">Dzikir 2 dari 7</span> <div class="progress-bar-container"> <div class="progress-bar-fill"></div> </div> </div>
+                        <div class="dhikr-card-new">
+                            <h3 class="dhikr-title-new">Bacaan Pujian</h3> <p class="dhikr-arabic-new" style="font-size: 1.7rem; line-height: 1.8;">اَللَّهُمَّ أَنْتَ السَّلاَمُ، وَمِنْكَ السَّلاَمُ، تَبَارَكْتَ يَا ذَا الْجَلاَلِ وَاْلإِكْرَامِ</p> <p class="dhikr-translation-new">"Ya Allah, Engkau-lah As-Salam, dan dari-Mu-lah keselamatan..."</p>
+                            <div class="counter-wrapper">
+                                <button class="progress-counter" data-max="1" aria-label="Hitung Dzikir">
+                                    <svg class="progress-ring" width="120" height="120"> <circle class="progress-ring__bg" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> </svg>
+                                    <span class="count-display-new">0</span>
+                                </button> <button class="reset-btn-new"><i class="fas fa-sync-alt"></i> Reset</button>
+                            </div> <span class="target-count-new">Target: 1x</span>
+                        </div>
+                    </div>
+                    <div class="dhikr-slide-new">
+                        <div class="dhikr-progress"> <span class="progress-text">Dzikir 3 dari 7</span> <div class="progress-bar-container"> <div class="progress-bar-fill"></div> </div> </div>
+                        <div class="dhikr-card-new">
+                            <h3 class="dhikr-title-new">Membaca Tasbih</h3> <p class="dhikr-arabic-new">سُبْحَانَ اللهِ</p> <p class="dhikr-translation-new">"Maha Suci Allah."</p>
+                            <div class="counter-wrapper">
+                                <button class="progress-counter" data-max="33" aria-label="Hitung Dzikir">
+                                    <svg class="progress-ring" width="120" height="120"> <circle class="progress-ring__bg" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> </svg>
+                                    <span class="count-display-new">0</span>
+                                </button> <button class="reset-btn-new"><i class="fas fa-sync-alt"></i> Reset</button>
+                            </div> <span class="target-count-new">Target: 33x</span>
+                        </div>
+                    </div>
+                    <div class="dhikr-slide-new">
+                        <div class="dhikr-progress"> <span class="progress-text">Dzikir 4 dari 7</span> <div class="progress-bar-container"> <div class="progress-bar-fill"></div> </div> </div>
+                        <div class="dhikr-card-new">
+                            <h3 class="dhikr-title-new">Membaca Tahmid</h3> <p class="dhikr-arabic-new">اَلْحَمْدُ لِلَّهِ</p> <p class="dhikr-translation-new">"Segala puji bagi Allah."</p>
+                            <div class="counter-wrapper">
+                                <button class="progress-counter" data-max="33" aria-label="Hitung Dzikir">
+                                    <svg class="progress-ring" width="120" height="120"> <circle class="progress-ring__bg" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> </svg>
+                                    <span class="count-display-new">0</span>
+                                </button> <button class="reset-btn-new"><i class="fas fa-sync-alt"></i> Reset</button>
+                            </div> <span class="target-count-new">Target: 33x</span>
+                        </div>
+                    </div>
+                    <div class="dhikr-slide-new">
+                        <div class="dhikr-progress"> <span class="progress-text">Dzikir 5 dari 7</span> <div class="progress-bar-container"> <div class="progress-bar-fill"></div> </div> </div>
+                        <div class="dhikr-card-new">
+                            <h3 class="dhikr-title-new">Membaca Takbir</h3> <p class="dhikr-arabic-new">اَللهُ أَكْبَرُ</p> <p class="dhikr-translation-new">"Allah Maha Besar."</p>
+                            <div class="counter-wrapper">
+                                <button class="progress-counter" data-max="33" aria-label="Hitung Dzikir">
+                                    <svg class="progress-ring" width="120" height="120"> <circle class="progress-ring__bg" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> </svg>
+                                    <span class="count-display-new">0</span>
+                                </button> <button class="reset-btn-new"><i class="fas fa-sync-alt"></i> Reset</button>
+                            </div> <span class="target-count-new">Target: 33x</span>
+                        </div>
+                    </div>
+                    <div class="dhikr-slide-new">
+                        <div class="dhikr-progress"> <span class="progress-text">Dzikir 6 dari 7</span> <div class="progress-bar-container"> <div class="progress-bar-fill"></div> </div> </div>
+                        <div class="dhikr-card-new">
+                            <h3 class="dhikr-title-new">Penyempurna Seratus</h3> <p class="dhikr-arabic-new" style="font-size: 1.5rem; line-height: 1.8;">لاَ إِلَهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ...</p> <p class="dhikr-translation-new">"Tidak ada ilah yang berhak disembah selain Allah semata..."</p>
+                            <div class="counter-wrapper">
+                                <button class="progress-counter" data-max="1" aria-label="Hitung Dzikir">
+                                    <svg class="progress-ring" width="120" height="120"> <circle class="progress-ring__bg" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> </svg>
+                                    <span class="count-display-new">0</span>
+                                </button> <button class="reset-btn-new"><i class="fas fa-sync-alt"></i> Reset</button>
+                            </div> <span class="target-count-new">Target: 1x</span>
+                        </div>
+                    </div>
+                    <div class="dhikr-slide-new">
+                        <div class="dhikr-progress"> <span class="progress-text">Dzikir 7 dari 7</span> <div class="progress-bar-container"> <div class="progress-bar-fill"></div> </div> </div>
+                        <div class="dhikr-card-new">
+                            <h3 class="dhikr-title-new">Membaca Ayat Kursi</h3> <p class="dhikr-arabic-new" style="font-size: 1.2rem; line-height: 2; text-align: justify;">ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ ٱلْحَىُّ ٱلْقَيُّومُ...</p> <p class="dhikr-translation-new">"(Terjemahan Ayat Al-Kursi)"</p>
+                            <div class="counter-wrapper">
+                                <button class="progress-counter" data-max="1" aria-label="Hitung Dzikir">
+                                    <svg class="progress-ring" width="120" height="120"> <circle class="progress-ring__bg" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="54" cx="60" cy="60"/> </svg>
+                                    <span class="count-display-new">0</span>
+                                </button> <button class="reset-btn-new"><i class="fas fa-sync-alt"></i> Reset</button>
+                            </div> <span class="target-count-new">Target: 1x</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="slider-nav-new prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-nav-new next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+
+        <section id="tata-cara-sholat-section" class="content-section">
+            <h2>Panduan Tata Cara Sholat</h2>
+            <div class="prayer-guide-container">
+                <div class="prayer-step"> <button class="step-header"> <span>1. Niat</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="step-note">Niat sholat letaknya di dalam hati dan diucapkan bersamaan dengan Takbiratul Ihram. Lafadz niat tidak diucapkan lisan, namun cukup dihadirkan dalam hati sesuai dengan sholat yang akan dikerjakan (misalnya, "Saya niat sholat fardhu Subuh dua rakaat karena Allah Ta'ala").</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>2. Takbiratul Ihram</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">اللهُ أَكْبَرُ</p> <p class="transliteration-text">Allahu Akbar</p> <p class="translation-text">"Allah Maha Besar."</p> <p class="step-note">Mengangkat kedua tangan sejajar dengan bahu atau telinga, kemudian meletakkannya di dada dengan tangan kanan di atas tangan kiri.</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>3. Membaca Doa Iftitah</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">اللهُ أَكْبَرُ كَبِيرًا، وَالْحَمْدُ لِلَّهِ كَثِيرًا، وَسُبْحَانَ اللهِ بُكْرَةً وَأَصِيلًا</p> <p class="transliteration-text">Allaahu akbar kabiraa walhamdulillaahi katsiiraa, wa subhaanallaahi bukratan wa'ashiilaa</p> <p class="translation-text">"Allah Maha Besar dengan sebesar-besarnya, segala puji bagi Allah dengan pujian yang banyak, dan Maha Suci Allah di waktu pagi dan petang."</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>4. Membaca Al-Fatihah</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text" style="font-size: 1.4rem; line-height: 2.2; text-align: justify;">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ. اَلْحَمْدُ لِلهِ رَبِّ الْعٰلَمِيْنَ. الرَّحْمٰنِ الرَّحِيْمِ. مٰلِكِ يَوْمِ الدِّيْنِ. اِيَّاكَ نَعْبُدُ وَاِيَّاكَ نَسْتَعِيْنُ. اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَ. صِرَاطَ الَّذِيْنَ اَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوْبِ عَلَيْهِمْ وَلَا الضَّاۤلِّيْنَ</p> <p class="step-note">Didahului dengan membaca Ta'awudz: "A'uudzu billaahi minasy-syaithaanir-rajiim" (Aku berlindung kepada Allah dari godaan setan yang terkutuk).</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>5. Ruku'</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">سُبْحَانَ رَبِّيَ الْعَظِيمِ وَبِحَمْدِهِ</p> <p class="transliteration-text">Subhaana robbiyal 'adziimi wa bihamdih (3x)</p> <p class="translation-text">"Maha Suci Tuhanku yang Maha Agung dan dengan memuji-Nya." (Dibaca 3 kali)</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>6. I'tidal (Bangkit dari Ruku')</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">سَمِعَ اللهُ لِمَنْ حَمِدَهُ</p> <p class="transliteration-text">Sami'allaahu liman hamidah</p> <p class="translation-text">"Allah Maha Mendengar orang yang memuji-Nya."</p> <hr style="border-color: var(--border-color); margin: 1rem 0;"> <p class="arabic-text">رَبَّنَا لَكَ الْحَمْدُ مِلْءَ السَّمَاوَاتِ وَمِلْءَ الْأَرْضِ وَمِلْءَ مَا شِئْتَ مِنْ شَيْءٍ بَعْدُ</p> <p class="transliteration-text">Robbanaa lakal hamdu mil'us samaawaati wa mil'ul ardhi wa mil'u maa syi'ta min syai'in ba'du</p> <p class="translation-text">"Ya Tuhan kami, bagi-Mu segala puji, sepenuh langit dan sepenuh bumi, dan sepenuh apa yang Engkau kehendaki setelah itu."</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>7. Sujud</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">سُبْحَانَ رَبِّيَ الْأَعْلَى وَبِحَمْدِهِ</p> <p class="transliteration-text">Subhaana robbiyal a'laa wa bihamdih (3x)</p> <p class="translation-text">"Maha Suci Tuhanku Yang Maha Tinggi dan dengan memuji-Nya." (Dibaca 3 kali)</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>8. Duduk di Antara Dua Sujud</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَاجْبُرْنِي وَارْفَعْنِي وَارْزُقْنِي وَاهْدِنِي وَعَافِنِي وَاعْفُ عَنِّي</p> <p class="transliteration-text">Robbighfirlii warhamnii wajburnii warfa'nii warzuqnii wahdinii wa'aafinii wa'fu 'annii</p> <p class="translation-text">"Ya Tuhanku, ampunilah aku, rahmatilah aku, cukupkanlah aku, angkatlah derajatku, berilah aku rezeki, berilah aku petunjuk, sehatkanlah aku, dan maafkanlah aku."</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>9. Tasyahud Akhir</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text" style="font-size: 1.4rem; line-height: 2.2;">التَّحِيَّاتُ الْمُبَارَكَاتُ الصَّلَوَاتُ الطَّيِّبَاتُ لِلَّهِ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ، اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى سَيِّدِنَا إِبْرَاهِيمَ وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيمَ، وَبَارِكْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى سَيِّدِنَا إِبْرَاهِيمَ وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيمَ، فِي الْعَالَمِينَ إِنَّكَ حَمِيدٌ مَجِيدٌ</p> <p class="step-note">Untuk Tasyahud Awal (pada sholat Dzuhur, Ashar, Maghrib, Isya), bacaan hanya sampai "wa asyhadu anna Muhammadar rasuulullah".</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>10. Salam</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">السَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللهِ</p> <p class="transliteration-text">Assalaamu 'alaikum wa rahmatullah</p> <p class="translation-text">"Keselamatan dan rahmat Allah semoga tercurah atas kalian."</p> <p class="step-note">Mengucapkan salam sambil menoleh ke kanan, kemudian menoleh ke kiri.</p> </div> </div> </div>
+            </div>
+        </section>
+
+        <section id="doa-nabi-section" class="content-section">
+            <h2>Kumpulan Doa Para Nabi</h2>
+            <div class="prayer-guide-container">
+                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Adam AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبَّنَا ظَلَمْنَا أَنْفُਸَنَا وَإِنْ لَمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ</p> <p class="transliteration-text">Robbanaa zholamnaa anfusanaa wa illam taghfirlanaa wa tarhamnaa lanakuunanna minal khoosiriin.</p> <p class="translation-text">"Ya Tuhan kami, kami telah menzalimi diri kami sendiri. Jika Engkau tidak mengampuni kami dan memberi rahmat kepada kami, niscaya kami termasuk orang-orang yang rugi."</p> <p class="step-note">QS. Al-A'raf: 23</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Nuh AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبِّ إِنِّي أَعُوذُ بِكَ أَنْ أَسْأَلَكَ مَا لَيْسَ لِي بِهِ عِلْمٌ ۖ وَإِلَّا تَغْفِرْ لِي وَتَرْحَمْنِي أَكُنْ مِنَ الْخَاسِرِينَ</p> <p class="transliteration-text">Rabbi innī a'ụżu bika an as`alaka mā laisa lī bihī 'ilm, wa illā tagfirlī wa tar-ḥamnī akum minal-khāsirīn.</p> <p class="translation-text">"Ya Tuhanku, sesungguhnya aku berlindung kepada-Mu untuk memohon sesuatu yang aku tidak mengetahui (hakikatnya). Kalau Engkau tidak mengampuniku dan menaruh belas kasihan kepadaku, niscaya aku termasuk orang yang rugi."</p> <p class="step-note">QS. Hud: 47</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Ibrahim AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبِّ هَبْ لِي مِنَ الصَّالِحِينَ</p> <p class="transliteration-text">Rabbi hab lī minaṣ-ṣāliḥīn.</p> <p class="translation-text">"Ya Tuhanku, anugerahkanlah kepadaku (seorang anak) yang termasuk orang yang saleh."</p> <p class="step-note">QS. As-Saffat: 100</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Yunus AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ</p> <p class="transliteration-text">Lā ilāha illā anta sub-ḥānaka innī kuntu minaẓ-ẓālimīn.</p> <p class="translation-text">"Tidak ada tuhan selain Engkau, Mahasuci Engkau. Sungguh, aku termasuk orang-orang yang zalim."</p> <p class="step-note">QS. Al-Anbiya: 87</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Musa AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِنْ لِسَانِي يَفْقَهُوا قَوْلِي</p> <p class="transliteration-text">Rabbisyraḥ lī ṣadrī wa yassir lī amrī waḥlul 'uqdatam mil lisānī yafqahụ qaulī.</p> <p class="translation-text">"Ya Tuhanku, lapangkanlah dadaku, dan mudahkanlah untukku urusanku, dan lepaskanlah kekakuan dari lidahku, agar mereka mengerti perkataanku."</p> <p class="step-note">QS. Taha: 25-28</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Ayyub AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">أَنِّي مَسَّنِيَ الضُّرُّ وَأَنْتَ أَرْحَمُ الرَّاحِمِينَ</p> <p class="transliteration-text">Annī massaniyaḍ-ḍurru wa anta ar-ḥamur-rāḥimīn.</p> <p class="translation-text">"(Ya Tuhanku), sesungguhnya aku telah ditimpa penyakit dan Engkau adalah Tuhan Yang Maha Penyayang di antara semua penyayang."</p> <p class="step-note">QS. Al-Anbiya: 83</p> </div> </div> </div>
+            </div>
+        </section>
+
+        <section id="kiblat-section" class="content-section">
+            <h2>Arah Kiblat</h2>
+            <div class="kiblat-container">
+                <div id="kiblat-permission-prompt">
+                    <p>Fitur ini memerlukan izin akses lokasi dan sensor gerak untuk menentukan arah Kiblat secara akurat.</p>
+                    <button id="kiblat-permission-btn">Izinkan & Mulai</button>
+                </div>
+
+                <div class="compass-ui-container" style="display: none;">
+                    <div class="compass" id="compass-container">
+                        <div class="compass-circle" id="qibla-compass-circle">
+                            <div class="compass-rose" id="compass-rose">
+                                <div class="degree-mark north">U</div>
+                                <div class="degree-mark east">T</div>
+                                <div class="degree-mark south">S</div>
+                                <div class="degree-mark west">B</div>
+                            </div>
+                            <div class="qibla-pointer" id="qibla-pointer">
+                                <div class="kaaba-icon">🕋</div>
+                            </div>
+                            <div class="lubber-line"></div>
+                        </div>
+                    </div>
+                    <div class="kiblat-info-box">
+                        <p class="direction-degree">Mencari lokasi...</p>
+                        <p class="calibration-info">Arahkan ponsel ke depan dan putar hingga ikon Ka'bah 🕋 sejajar dengan garis merah di atas.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="doa-harian-section" class="content-section">
+            <h2>Doa Sehari-hari</h2>
+            <div class="prayer-guide-container">
+                <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Sebelum Tidur</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">بِاسْمِكَ اللَّهُمَّ أَحْيَا وَبِاسْمِكَ أَمُوتُ</p>
+                            <p class="transliteration-text">Bismikallahumma ahya wa bismika amuut.</p>
+                            <p class="translation-text">"Dengan nama-Mu ya Allah aku hidup dan dengan nama-Mu aku mati."</p>
+                            <p class="step-note">HR. Bukhari dan Muslim</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Bangun Tidur</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ</p>
+                            <p class="transliteration-text">Alhamdulillahilladzi ahyaanaa ba'da maa amaatanaa wa ilaihin nusyuur.</p>
+                            <p class="translation-text">"Segala puji bagi Allah yang telah menghidupkan kami sesudah kami mati (tidur) dan kepada-Nya kami dikembalikan."</p>
+                            <p class="step-note">HR. Bukhari</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Masuk Kamar Mandi</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ</p>
+                            <p class="transliteration-text">Allahumma inni a'udzubika minal khubutsi wal khabaaits.</p>
+                            <p class="translation-text">"Ya Allah, aku berlindung kepada-Mu dari godaan setan jantan dan setan betina."</p>
+                            <p class="step-note">HR. Bukhari dan Muslim</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Keluar Kamar Mandi</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">غُفْرَانَكَ</p>
+                            <p class="transliteration-text">Ghufronaka.</p>
+                            <p class="translation-text">"Aku memohon ampunan-Mu."</p>
+                            <p class="step-note">HR. Tirmidzi, Abu Dawud, Ibnu Majah</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Sebelum Makan</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ</p>
+                            <p class="transliteration-text">Allahumma baarik lanaa fiimaa rozaqtanaa wa qinaa 'adzaaban naar.</p>
+                            <p class="translation-text">"Ya Allah, berkahilah kami dalam rezeki yang telah Engkau berikan kepada kami dan peliharalah kami dari siksa api neraka."</p>
+                            <p class="step-note">Jika lupa di awal, baca: "Bismillaahi awwalahu wa aakhirohu" (Dengan nama Allah di awal dan di akhirnya).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Sesudah Makan</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مِنَ الْمُسْلِمِينَ</p>
+                            <p class="transliteration-text">Alhamdulillahilladzi ath'amanaa wa saqoonaa wa ja'alanaa minal muslimiin.</p>
+                            <p class="translation-text">"Segala puji bagi Allah yang telah memberi kami makan dan minum, serta menjadikan kami termasuk golongan orang-orang muslim."</p>
+                            <p class="step-note">HR. Abu Dawud, Tirmidzi, Ibnu Majah</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Keluar Rumah</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ</p>
+                            <p class="transliteration-text">Bismillahi, tawakkaltu 'alallah, laa haula wa laa quwwata illaa billaah.</p>
+                            <p class="translation-text">"Dengan nama Allah, aku bertawakal kepada Allah. Tiada daya dan kekuatan kecuali dengan Allah."</p>
+                            <p class="step-note">HR. Abu Dawud, Tirmidzi</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="prayer-step">
+                    <button class="step-header"> <span>Doa Masuk Rumah</span> <i class="fas fa-plus step-icon"></i> </button>
+                    <div class="step-content">
+                        <div class="content-wrapper">
+                            <p class="arabic-text">بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا</p>
+                            <p class="transliteration-text">Bismillahi walajnaa, wa bismillahi kharajnaa, wa 'alallahi rabbina tawakkalnaa.</p>
+                            <p class="translation-text">"Dengan nama Allah kami masuk, dengan nama Allah kami keluar, dan hanya kepada Allah Tuhan kami, kami bertawakal."</p>
+                            <p class="step-note">HR. Abu Dawud. Kemudian ucapkan salam.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tasbih-digital-section" class="content-section">
+            <h2>Penghitung Digital</h2>
+            <div class="tasbih-container">
+                <div id="tasbih-setup" class="tasbih-setup-container">
+                    <div class="tasbih-form-group">
+                        <select id="dzikir-select">
+                            <option value="" disabled selected>Pilih Dzikir</option>
+                            <option value="Subhanallah">Subhanallah</option>
+                            <option value="Alhamdulillah">Alhamdulillah</option>
+                            <option value="Allahu Akbar">Allahu Akbar</option>
+                            <option value="Laa ilaha illallah">Laa ilaha illallah</option>
+                            <option value="Astaghfirullah">Astaghfirullah</option>
+                            <option value="custom">Isi Sendiri</option>
+                        </select>
+                    </div>
+                    <div class="tasbih-form-group">
+                         <input type="text" id="custom-dzikir-input" placeholder="Ketik dzikir di sini" style="display: none;">
+                    </div>
+                    <div class="tasbih-form-group">
+                        <input type="number" id="dzikir-target" placeholder="Jumlah Dzikir">
+                    </div>
+                    <button id="start-tasbih-btn" class="tasbih-btn">Mulai</button>
+                </div>
+        
+                <div id="tasbih-counter" class="tasbih-counter-container" style="display: none;">
+                    <h3 id="display-dzikir-text"></h3>
+                    <p id="display-dzikir-target"></p>
+                    <div class="counter-ui">
+                        <button id="reset-count-btn" class="tasbih-control-btn"><i class="fas fa-sync-alt"></i></button>
+                        <span id="tasbih-count-display">0</span>
+                        <button id="increment-tasbih-btn" class="tasbih-control-btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <a href="#" id="reset-setup-link">Reset Penghitung</a>
+                </div>
+            </div>
         </section>
 
         <section id="penjelasan-section" class="content-section">
@@ -696,6 +1233,7 @@
                 <p>Dengan rutin berzikir, seorang muslim akan senantiasa merasakan kehadiran Allah, menemukan ketenangan jiwa, dan memperkuat keimanannya. Ini adalah salah satu bentuk ibadah yang paling mudah namun memiliki ganjaran yang besar di sisi Allah.</p>
             </div>
         </section>
+
         <section id="pengaturan-section" class="content-section">
             <h2>Pengaturan Aplikasi</h2>
             <div class="settings-container">
@@ -717,6 +1255,12 @@
                         <label class="switch"><input type="checkbox" id="location-access-toggle"><span class="slider"></span></label>
                     </li>
                     <li class="settings-item">
+                        <a href="#" id="refresh-location-btn" style="text-decoration: none; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                            <div class="setting-label">Ganti / Refresh Lokasi</div>
+                            <i class="fas fa-sync-alt chevron-icon" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    <li class="settings-item">
                         <div class="setting-label">Notifikasi Adzan</div>
                         <label class="switch"><input type="checkbox" id="notification-toggle"><span class="slider"></span></label>
                     </li>
@@ -727,18 +1271,82 @@
                 </ul>
                 <h4 class="settings-list-title">Informasi</h4>
                 <ul class="settings-list">
-                    <li class="settings-item"><a href="#"><div class="setting-label">Kebijakan Privasi</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
-                    <li class="settings-item"><a href="#"><div class="setting-label">Ketentuan Penggunaan</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
-                    <li class="settings-item"><a href="#"><div class="setting-label">Saran & Masukan</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
+                    <li class="settings-item"><a href="#kebijakan-privasi" class="nav-shortcut"><div class="setting-label">Kebijakan Privasi</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
+                    <li class="settings-item"><a href="#ketentuan-penggunaan" class="nav-shortcut"><div class="setting-label">Ketentuan Penggunaan</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
+                    <li class="settings-item"><a href="#saran-masukan" class="nav-shortcut"><div class="setting-label">Saran & Masukan</div><i class="fas fa-chevron-right chevron-icon" aria-hidden="true"></i></a></li>
                     <li class="settings-item"><div class="setting-label">Versi Aplikasi</div><div class="setting-value">v1.2.0 (27)</div></li>
                 </ul>
             </div>
             <a href="#" class="store-button"><i class="fab fa-google-play" aria-hidden="true"></i> Unduh di Google PlayStore</a>
         </section>
+
+        <section id="kebijakan-privasi-section" class="content-section">
+            <h2>Kebijakan Privasi</h2>
+            <div class="explanation-container">
+                <p><strong>Terakhir Diperbarui:</strong> 5 September 2025</p>
+                <p>Kami di ZikirNur ("kami", "milik kami", atau "kita") menghargai privasi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda saat Anda menggunakan aplikasi kami.</p>
+                
+                <h4>Informasi yang Kami Kumpulkan</h4>
+                <ul>
+                    <li><strong>Data Lokasi:</strong> Kami meminta akses ke lokasi geografis Anda (latitude dan longitude) untuk memberikan fitur inti seperti waktu sholat dan arah Kiblat yang akurat. Data ini hanya digunakan saat aplikasi aktif dan tidak disimpan secara permanen di server kami.</li>
+                    <li><strong>Data Penggunaan Non-Pribadi:</strong> Kami dapat mengumpulkan informasi anonim tentang bagaimana Anda berinteraksi dengan aplikasi (misalnya, fitur yang paling sering digunakan) untuk membantu kami meningkatkan layanan.</li>
+                </ul>
+    
+                <h4>Bagaimana Kami Menggunakan Informasi Anda</h4>
+                <ul>
+                    <li>Menyediakan dan memelihara fungsionalitas aplikasi.</li>
+                    <li>Menampilkan waktu sholat dan arah Kiblat yang akurat berdasarkan lokasi Anda.</li>
+                    <li>Mengirimkan notifikasi adzan jika Anda mengizinkannya.</li>
+                    <li>Memahami bagaimana pengguna menggunakan aplikasi kami untuk tujuan perbaikan dan pengembangan.</li>
+                </ul>
+    
+                <h4>Berbagi Informasi</h4>
+                <p>Kami tidak menjual, memperdagangkan, atau menyewakan informasi identifikasi pribadi Anda kepada pihak lain. Data lokasi Anda dapat dibagikan dengan penyedia layanan pihak ketiga (API waktu sholat) hanya untuk tujuan menyediakan layanan dalam aplikasi.</p>
+    
+                <h4>Keamanan</h4>
+                <p>Kami berkomitmen untuk melindungi data Anda. Namun, perlu diingat bahwa tidak ada metode transmisi melalui internet atau metode penyimpanan elektronik yang 100% aman.</p>
+    
+                <h4>Perubahan pada Kebijakan Ini</h4>
+                <p>Kami dapat memperbarui Kebijakan Privasi kami dari waktu ke waktu. Kami akan memberitahu Anda tentang perubahan apa pun dengan memposting Kebijakan Privasi baru di halaman ini.</p>
+    
+                <h4>Hubungi Kami</h4>
+                <p>Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami di: <a href="mailto:dukungan.zikirnur@email.com" style="color: var(--primary-color);">dukungan.zikirnur@email.com</a>.</p>
+            </div>
+        </section>
+        
+        <section id="ketentuan-penggunaan-section" class="content-section">
+            <h2>Ketentuan Penggunaan</h2>
+            <div class="explanation-container">
+                <p><strong>Terakhir Diperbarui:</strong> 5 September 2025</p>
+                <p>Selamat datang di ZikirNur. Dengan mengunduh, mengakses, atau menggunakan aplikasi kami, Anda setuju untuk terikat oleh Ketentuan Penggunaan ini.</p>
+                
+                <h4>1. Penggunaan Aplikasi</h4>
+                <p>Aplikasi ZikirNur disediakan untuk penggunaan pribadi dan non-komersial Anda. Anda setuju untuk tidak menggunakan aplikasi untuk tujuan apa pun yang melanggar hukum atau dilarang oleh ketentuan ini.</p>
+                
+                <h4>2. Akurasi Informasi</h4>
+                <p>Kami berusaha untuk memberikan informasi yang seakurat mungkin, termasuk waktu sholat dan arah Kiblat. Namun, kami tidak menjamin keakuratan, kelengkapan, atau keandalan informasi apa pun. Anda bertanggung jawab untuk memverifikasi informasi penting secara mandiri.</p>
+                
+                <h4>3. Batasan Tanggung Jawab</h4>
+                <p>Dalam batas yang diizinkan oleh hukum, ZikirNur tidak akan bertanggung jawab atas kerusakan langsung, tidak langsung, insidental, atau konsekuensial yang timbul dari penggunaan atau ketidakmampuan untuk menggunakan aplikasi ini.</p>
+                
+                <h4>4. Perubahan Ketentuan</h4>
+                <p>Kami berhak untuk mengubah Ketentuan Penggunaan ini kapan saja. Penggunaan Anda yang berkelanjutan atas aplikasi setelah perubahan tersebut merupakan penerimaan Anda terhadap ketentuan baru.</p>
+            </div>
+        </section>
+
+        <section id="saran-masukan-section" class="content-section">
+            <h2>Saran & Masukan</h2>
+            <div class="explanation-container" style="text-align: center; padding-top: 2rem;">
+                <p style="font-size: 1.1rem; margin-bottom: 1rem;">Kami sangat menghargai setiap masukan dari Anda untuk menjadikan ZikirNur lebih baik.</p>
+                <p>Apakah Anda menemukan bug, memiliki ide untuk fitur baru, atau hanya ingin menyapa? Jangan ragu untuk menghubungi kami!</p>
+                <a href="mailto:feedback.zikirnur@email.com" class="survey-button" style="margin-top: 2rem; text-decoration: none;">
+                    <i class="fas fa-envelope"></i> Kirim Email kepada Kami
+                </a>
+                <p style="margin-top: 2rem; color: var(--icon-color);">Setiap saran Anda sangat berarti bagi pengembangan aplikasi ini ke depannya. Terima kasih telah menjadi bagian dari perjalanan ZikirNur.</p>
+            </div>
+        </section>
+
     </main>
-    <footer>
-        <p>&copy; 2025 ZikirNur</p>
-    </footer>
 
     <div id="permission-popup" class="popup-overlay">
         <div class="popup-content">
@@ -759,7 +1367,8 @@
             const openSidebarBtn = document.getElementById('openSidebarBtn');
             const sidebar = document.getElementById('mySidebar');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
-            const navLinks = document.querySelectorAll('.sidebar-nav-list .nav-link');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const shortcutLinks = document.querySelectorAll('.nav-shortcut');
             const sections = document.querySelectorAll('.content-section');
             const darkModeToggle = document.getElementById('dark-mode-toggle');
             const autoModeToggle = document.getElementById('auto-mode-toggle');
@@ -769,7 +1378,7 @@
             const soundToggle = document.getElementById('sound-toggle');
             const locationDisplay = document.querySelector('.card-location');
             
-            // [PENAMBAHAN BARU] Elemen Pop-up
+            const refreshLocationBtn = document.getElementById('refresh-location-btn');
             const popup = document.getElementById('permission-popup');
             const popupIcon = document.getElementById('popup-icon-container');
             const popupTitle = document.getElementById('popup-title');
@@ -778,149 +1387,152 @@
             const popupDenyBtn = document.getElementById('popup-deny-btn');
 
             // --- Sidebar Logic ---
-            function openSidebar() {
-                sidebar.classList.add('active');
-                sidebarOverlay.classList.add('active');
-            }
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
-            }
+            function openSidebar() { sidebar.classList.add('active'); sidebarOverlay.classList.add('active'); }
+            function closeSidebar() { sidebar.classList.remove('active'); sidebarOverlay.classList.remove('active'); }
             openSidebarBtn.addEventListener('click', openSidebar);
             sidebarOverlay.addEventListener('click', closeSidebar);
+            
+            // --- Shortcut Ikon Info ke Pengaturan ---
+            const infoToSettingsBtn = document.getElementById('infoToSettingsBtn');
+            infoToSettingsBtn.addEventListener('click', () => {
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById('pengaturan-section').classList.add('active');
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('current-page');
+                });
+                document.querySelector('a[href="#pengaturan"]').classList.add('current-page');
+                window.scrollTo(0, 0);
+            });
 
             // --- Navigation Logic ---
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
+            function handleNavigation(e) {
+                e.preventDefault();
+                const targetId = e.currentTarget.getAttribute('href').substring(1) + '-section';
+                
+                const correspondingSidebarLink = document.querySelector(`.sidebar-nav-list a[href="${e.currentTarget.getAttribute('href')}"]`);
+                if (correspondingSidebarLink) {
                     navLinks.forEach(l => l.classList.remove('current-page'));
-                    e.currentTarget.classList.add('current-page');
-                    const targetId = e.currentTarget.getAttribute('href').substring(1) + '-section';
-                    sections.forEach(section => section.classList.remove('active'));
-                    const targetSection = document.getElementById(targetId);
-                    if (targetSection) {
-                        targetSection.classList.add('active');
+                    correspondingSidebarLink.classList.add('current-page');
+                }
+
+                sections.forEach(section => section.classList.remove('active'));
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                if(window.isQiblaActive && targetId !== 'kiblat-section') {
+                    const stopQiblaCompass = window.stopQiblaCompass;
+                    if(typeof stopQiblaCompass === 'function') {
+                        stopQiblaCompass();
                     }
-                    closeSidebar();
-                    window.scrollTo(0, 0);
-                });
-            });
+                }
+
+                closeSidebar();
+                window.scrollTo(0, 0);
+            }
+
+            navLinks.forEach(link => { link.addEventListener('click', handleNavigation); });
+            shortcutLinks.forEach(link => { link.addEventListener('click', handleNavigation); });
+            
             document.querySelector('.sidebar-nav-list a[href="#dashboard"]').classList.add('current-page');
             document.getElementById('dashboard-section').classList.add('active');
 
             // --- Dark Mode Logic ---
-            let autoModeInterval;
-            function setMode(isDark) {
-                const moonIconBtn = document.getElementById('darkModeIcon');
-                if (isDark) {
-                    document.body.classList.add('dark-mode');
-                    moonIconBtn.classList.add('dark-mode-active');
-                } else {
-                    document.body.classList.remove('dark-mode');
-                    moonIconBtn.classList.remove('dark-mode-active');
-                }
-            }
-            function checkAutoMode() {
-                const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
-                setMode(isNight);
-            }
-            function applySavedMode() {
-                const savedMode = localStorage.getItem('themeMode') || 'auto';
-                if (savedMode === 'dark') {
-                    setMode(true);
-                    darkModeToggle.checked = true;
-                    autoModeToggle.checked = false;
-                } else if (savedMode === 'light') {
-                    setMode(false);
-                    darkModeToggle.checked = false;
-                    autoModeToggle.checked = false;
-                } else {
-                    autoModeToggle.checked = true;
-                    darkModeToggle.disabled = true;
-                    checkAutoMode();
-                    autoModeInterval = setInterval(checkAutoMode, 60000);
-                }
-            }
-            darkModeToggle.addEventListener('change', () => {
-                localStorage.setItem('themeMode', darkModeToggle.checked ? 'dark' : 'light');
-                applySavedMode();
-            });
-            autoModeToggle.addEventListener('change', () => {
-                clearInterval(autoModeInterval);
-                if (autoModeToggle.checked) {
-                    localStorage.setItem('themeMode', 'auto');
-                    darkModeToggle.checked = false;
-                    darkModeToggle.disabled = true;
-                    checkAutoMode();
-                    autoModeInterval = setInterval(checkAutoMode, 60000);
-                } else {
-                    darkModeToggle.disabled = false;
-                    localStorage.setItem('themeMode', 'light');
-                }
-                applySavedMode();
-            });
-            darkModeIcon.addEventListener('click', () => {
-                const isCurrentlyDark = document.body.classList.contains('dark-mode');
-                autoModeToggle.checked = false;
-                darkModeToggle.disabled = false;
-                darkModeToggle.checked = !isCurrentlyDark;
-                localStorage.setItem('themeMode', !isCurrentlyDark ? 'dark' : 'light');
-                applySavedMode();
-            });
-            applySavedMode();
+            let autoModeInterval; function setMode(isDark){const moonIconBtn=document.getElementById('darkModeIcon');if(isDark){document.body.classList.add('dark-mode');moonIconBtn.classList.add('dark-mode-active');}else{document.body.classList.remove('dark-mode');moonIconBtn.classList.remove('dark-mode-active');}}
+            function checkAutoMode(){const isNight=new Date().getHours()>=18||new Date().getHours()<6;setMode(isNight);}
+            function applySavedMode(){const savedMode=localStorage.getItem('themeMode')||'auto';if(savedMode==='dark'){setMode(true);darkModeToggle.checked=true;autoModeToggle.checked=false;}else if(savedMode==='light'){setMode(false);darkModeToggle.checked=false;autoModeToggle.checked=false;}else{autoModeToggle.checked=true;darkModeToggle.disabled=true;checkAutoMode();autoModeInterval=setInterval(checkAutoMode,60000);}}
+            darkModeToggle.addEventListener('change',()=>{localStorage.setItem('themeMode',darkModeToggle.checked?'dark':'light');applySavedMode();});autoModeToggle.addEventListener('change',()=>{clearInterval(autoModeInterval);if(autoModeToggle.checked){localStorage.setItem('themeMode','auto');darkModeToggle.checked=false;darkModeToggle.disabled=true;checkAutoMode();autoModeInterval=setInterval(checkAutoMode,60000);}else{darkModeToggle.disabled=false;localStorage.setItem('themeMode','light');}
+            applySavedMode();});darkModeIcon.addEventListener('click',()=>{const isCurrentlyDark=document.body.classList.contains('dark-mode');autoModeToggle.checked=false;darkModeToggle.disabled=false;darkModeToggle.checked=!isCurrentlyDark;localStorage.setItem('themeMode',!isCurrentlyDark?'dark':'light');applySavedMode();});applySavedMode();
 
-            // --- [MODIFIKASI] Permission Logic dengan Pop-up Kustom ---
+            // --- Popup Logic ---
+            function hidePermissionPopup(){ popup.classList.remove('active'); }
 
-            // Fungsi untuk menampilkan pop-up
-            function showPermissionPopup({ title, message, iconHtml, onAllow, onDeny }) {
+            function showPermissionPopup({title,message,iconHtml,onAllow,onDeny}){
+                popupTitle.textContent=title;
+                popupMessage.textContent=message;
+                popupIcon.innerHTML=iconHtml;
+                
+                popupDenyBtn.style.display = 'block';
+                popupAllowBtn.textContent = 'Izinkan';
+
+                const newAllowBtn=popupAllowBtn.cloneNode(true);
+                popupAllowBtn.parentNode.replaceChild(newAllowBtn,popupAllowBtn);
+                
+                const newDenyBtn=popupDenyBtn.cloneNode(true);
+                popupDenyBtn.parentNode.replaceChild(newDenyBtn,popupDenyBtn);
+                
+                newAllowBtn.addEventListener('click',()=>{onAllow();hidePermissionPopup();});
+                newDenyBtn.addEventListener('click',()=>{onDeny();hidePermissionPopup();});
+                
+                popup.classList.add('active');
+            }
+            
+            function showCustomPopup({title, message, iconHtml, primaryBtnText, onPrimaryClick}) {
                 popupTitle.textContent = title;
                 popupMessage.textContent = message;
                 popupIcon.innerHTML = iconHtml;
-
-                // Clone dan replace untuk menghapus event listener lama
-                const newAllowBtn = popupAllowBtn.cloneNode(true);
-                popupAllowBtn.parentNode.replaceChild(newAllowBtn, popupAllowBtn);
+                const denyBtn = document.getElementById('popup-deny-btn');
+                denyBtn.style.display = 'none';
+                const allowBtn = document.getElementById('popup-allow-btn');
+                allowBtn.textContent = primaryBtnText || 'OK';
+                const newAllowBtn = allowBtn.cloneNode(true);
+                allowBtn.parentNode.replaceChild(newAllowBtn, allowBtn);
                 
-                const newDenyBtn = popupDenyBtn.cloneNode(true);
-                popupDenyBtn.parentNode.replaceChild(newDenyBtn, popupDenyBtn);
-
                 newAllowBtn.addEventListener('click', () => {
-                    onAllow();
+                    if(onPrimaryClick) onPrimaryClick();
                     hidePermissionPopup();
-                });
-                newDenyBtn.addEventListener('click', () => {
-                    onDeny();
-                    hidePermissionPopup();
+                    setTimeout(() => {
+                        denyBtn.style.display = 'block';
+                        newAllowBtn.textContent = 'Izinkan';
+                    }, 300);
                 });
 
                 popup.classList.add('active');
             }
-            // Fungsi untuk menyembunyikan pop-up
-            function hidePermissionPopup() {
-                popup.classList.remove('active');
-            }
 
+            // --- Prayer Times & Permissions Logic ---
+
+            refreshLocationBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const icon = refreshLocationBtn.querySelector('i');
+                if (icon.classList.contains('refreshing')) return;
+
+                showPermissionPopup({
+                    title: 'Refresh Lokasi',
+                    message: 'Kami akan mencoba mendeteksi ulang lokasi Anda. Pastikan GPS aktif.',
+                    iconHtml: '<i class="fas fa-map-marker-alt"></i>',
+                    onAllow: () => { requestLocationAccess(true); }, // true for manual refresh
+                    onDeny: () => {}
+                });
+            });
 
             locationToggle.addEventListener('change', (e) => {
                 if (e.target.checked) {
-                    e.preventDefault(); // Mencegah toggle langsung aktif
-                    showPermissionPopup({
-                        title: 'Izin Lokasi',
-                        message: 'ZikirNur memerlukan akses lokasi Anda untuk menampilkan waktu sholat yang akurat di wilayah Anda. Data lokasi tidak akan dibagikan.',
-                        iconHtml: '<i class="fas fa-map-marker-alt"></i>',
-                        onAllow: () => {
-                           locationToggle.checked = true; // Aktifkan toggle
-                           requestLocationAccess();
-                        },
-                        onDeny: () => {
-                           locationToggle.checked = false; // Batalkan aktivasi
-                        }
-                    });
+                    // Hanya minta izin jika belum pernah diberikan
+                    if (localStorage.getItem('locationAccess') !== 'granted') {
+                        e.preventDefault(); // Mencegah toggle langsung aktif
+                        showPermissionPopup({
+                            title: 'Izin Lokasi',
+                            message: 'ZikirNur memerlukan akses lokasi Anda untuk menampilkan waktu sholat yang akurat. Data lokasi tidak akan dibagikan.',
+                            iconHtml: '<i class="fas fa-map-marker-alt"></i>',
+                            onAllow: () => {
+                                locationToggle.checked = true; // Aktifkan toggle setelah izin
+                                requestLocationAccess();
+                            },
+                            onDeny: () => {
+                                locationToggle.checked = false; // Biarkan toggle mati
+                            }
+                        });
+                    }
                 } else {
-                     localStorage.removeItem('userLocation');
-                     localStorage.setItem('locationAccess', 'denied');
-                     locationDisplay.textContent = 'Medan, Sumatera Utara';
-                     fetchPrayerTimes(); // Kembali ke default
+                    // Jika toggle dimatikan, hapus data dan kembali ke default
+                    localStorage.removeItem('userLocation');
+                    localStorage.setItem('locationAccess', 'denied');
+                    locationDisplay.textContent = 'Medan, Sumatera Utara';
+                    fetchPrayerTimes(); // Ambil data default
                 }
             });
 
@@ -929,7 +1541,7 @@
                     e.preventDefault();
                     showPermissionPopup({
                         title: 'Izin Notifikasi',
-                        message: 'Izinkan notifikasi agar kami dapat mengingatkan Anda saat waktu sholat tiba (adzan). Anda juga dapat mengaktifkan suara notifikasi setelah ini.',
+                        message: 'Izinkan notifikasi agar kami dapat mengingatkan Anda saat waktu sholat tiba (adzan).',
                         iconHtml: '<i class="fas fa-bell"></i>',
                         onAllow: () => {
                             notificationToggle.checked = true;
@@ -940,18 +1552,22 @@
                         }
                     });
                 } else {
-                     localStorage.setItem('notificationPermission', 'denied');
-                     soundToggle.checked = false;
-                     soundToggle.disabled = true;
-                     localStorage.setItem('soundPermission', 'denied');
+                    localStorage.setItem('notificationPermission', 'denied');
+                    soundToggle.checked = false;
+                    soundToggle.disabled = true;
+                    localStorage.setItem('soundPermission', 'denied');
                 }
             });
 
             soundToggle.addEventListener('change', () => {
                 localStorage.setItem('soundPermission', soundToggle.checked ? 'granted' : 'denied');
             });
-            
-            function requestLocationAccess() {
+
+            function requestLocationAccess(isManualRefresh = false) {
+                const refreshIcon = refreshLocationBtn.querySelector('i');
+                if (isManualRefresh) {
+                    refreshIcon.classList.add('refreshing');
+                }
                 if ('geolocation' in navigator) {
                     locationDisplay.textContent = 'Mendapatkan lokasi...';
                     navigator.geolocation.getCurrentPosition(
@@ -959,19 +1575,24 @@
                             const { latitude, longitude } = position.coords;
                             localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
                             localStorage.setItem('locationAccess', 'granted');
+                            locationToggle.checked = true;
                             fetchCityName(latitude, longitude);
                             fetchPrayerTimes(latitude, longitude);
+                            if (isManualRefresh) refreshIcon.classList.remove('refreshing');
                         },
                         error => {
                             console.error("Error getting location:", error);
                             locationToggle.checked = false;
                             localStorage.setItem('locationAccess', 'denied');
-                            locationDisplay.textContent = 'Medan, Sumatera Utara';
+                            locationDisplay.textContent = 'Gagal, kembali ke default.';
+                            setTimeout(() => { locationDisplay.textContent = 'Medan, Sumatera Utara'; }, 1500);
+                            if (isManualRefresh) refreshIcon.classList.remove('refreshing');
                         }
                     );
                 } else {
                     alert('Geolocation tidak didukung oleh browser Anda.');
                     locationToggle.checked = false;
+                    if (isManualRefresh) refreshIcon.classList.remove('refreshing');
                 }
             }
 
@@ -995,10 +1616,7 @@
                         if (permission === 'granted') {
                             localStorage.setItem('notificationPermission', 'granted');
                             soundToggle.disabled = false;
-                            new Notification('ZikirNur', {
-                                body: 'Terima kasih! Notifikasi adzan telah diaktifkan.',
-                                icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png' // Example icon
-                            });
+                            new Notification('ZikirNur', { body: 'Terima kasih! Notifikasi adzan telah diaktifkan.', icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png' });
                         } else {
                             notificationToggle.checked = false;
                             soundToggle.disabled = true;
@@ -1012,19 +1630,17 @@
             }
 
             function initializePermissions() {
-                // Location
+                // *** PERUBAHAN LOGIKA UTAMA DI SINI ***
                 if (localStorage.getItem('locationAccess') === 'granted') {
                     locationToggle.checked = true;
-                    const savedLocation = JSON.parse(localStorage.getItem('userLocation'));
-                    if (savedLocation) {
-                        fetchCityName(savedLocation.latitude, savedLocation.longitude);
-                        fetchPrayerTimes(savedLocation.latitude, savedLocation.longitude);
-                    }
+                    // Langsung coba akses lokasi tanpa bertanya lagi
+                    requestLocationAccess(); 
                 } else {
                     locationToggle.checked = false;
-                    fetchPrayerTimes(); // Fetch default
+                    // Jika tidak ada izin, gunakan data default
+                    fetchPrayerTimes(); 
                 }
-                // Notifications
+
                 if (localStorage.getItem('notificationPermission') === 'granted' && Notification.permission === 'granted') {
                     notificationToggle.checked = true;
                     soundToggle.disabled = false;
@@ -1036,7 +1652,6 @@
                 }
             }
 
-            // --- Prayer Times API ---
             async function fetchPrayerTimes(lat = null, lon = null) {
                 const ADJUSTMENT = 2;
                 let apiUrl;
@@ -1045,12 +1660,9 @@
                 } else {
                     apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=Medan&country=Indonesia&method=11`;
                 }
-                
                 try {
                     const response = await fetch(apiUrl);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
                     const data = await response.json();
                     if (data.code === 200) {
                         const times = data.data.timings;
@@ -1066,7 +1678,6 @@
                         document.getElementById('time-Asr').textContent = times.Asr;
                         document.getElementById('time-Maghrib').textContent = times.Maghrib;
                         document.getElementById('time-Isha').textContent = adjustTime(times.Isha, ADJUSTMENT);
-
                         const hijri = data.data.date.hijri;
                         document.getElementById('currentDateHijri').textContent = `${hijri.weekday.ar}, ${hijri.day} ${hijri.month.ar} ${hijri.year} H`;
                         highlightNextPrayer();
@@ -1074,11 +1685,10 @@
                 } catch (error) {
                     console.error("Gagal mengambil data waktu sholat:", error);
                     const prayerGrid = document.getElementById('prayerTimesGrid');
-                    if(prayerGrid) {
-                        prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`;
-                    }
+                    if (prayerGrid) { prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`; }
                 }
             }
+
             function highlightNextPrayer() {
                 const now = new Date();
                 const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -1099,88 +1709,213 @@
                     }
                 }
                 if (!nextPrayerFound) {
-                     const fajrItem = document.getElementById('time-Fajr');
-                     if(fajrItem) fajrItem.closest('.prayer-time-item').classList.add('next-prayer');
+                    const fajrItem = document.getElementById('time-Fajr');
+                    if (fajrItem) fajrItem.closest('.prayer-time-item').classList.add('next-prayer');
                 }
             }
-
+            
             initializePermissions();
             setInterval(highlightNextPrayer, 30000);
 
-            // --- Logika Audio Player ---
-            const allAudios = document.querySelectorAll('audio');
-            const audioContainer = document.querySelector('.featured-zikir-container');
-
-            function stopAllAudios(exceptAudio) {
-                allAudios.forEach(audio => {
-                    if (audio !== exceptAudio) {
-                        audio.pause();
-                        audio.currentTime = 0;
-                    }
-                });
-            }
-
-            function resetAllPlayersUI(exceptContainer) {
-                document.querySelectorAll('.audio-controls-container').forEach(container => {
-                    if (container !== exceptContainer) {
-                        container.querySelector('.play-btn').classList.remove('hidden');
-                        container.querySelector('.pause-btn').classList.add('hidden');
-                        container.querySelector('.stop-btn').classList.add('hidden');
-                    }
-                });
-            }
-
-            audioContainer.addEventListener('click', (e) => {
-                const playBtn = e.target.closest('.play-btn');
-                const pauseBtn = e.target.closest('.pause-btn');
-                const stopBtn = e.target.closest('.stop-btn');
-                
-                if (playBtn) {
-                    const targetId = playBtn.dataset.target;
-                    const audio = document.getElementById(targetId);
-                    const container = playBtn.parentElement;
-
-                    stopAllAudios(audio);
-                    resetAllPlayersUI(container);
-
-                    audio.play();
-                    playBtn.classList.add('hidden');
-                    container.querySelector('.pause-btn').classList.remove('hidden');
-                    container.querySelector('.stop-btn').classList.remove('hidden');
-                }
-
-                if (pauseBtn) {
-                    const targetId = pauseBtn.dataset.target;
-                    const audio = document.getElementById(targetId);
-                    const container = pauseBtn.parentElement;
-                    
-                    audio.pause();
-                    pauseBtn.classList.add('hidden');
-                    container.querySelector('.play-btn').classList.remove('hidden');
-                }
-                
-                if (stopBtn) {
-                    const targetId = stopBtn.dataset.target;
-                    const audio = document.getElementById(targetId);
-                    const container = stopBtn.parentElement;
-                    
-                    audio.pause();
-                    audio.currentTime = 0;
-                    stopBtn.classList.add('hidden');
-                    container.querySelector('.pause-btn').classList.add('hidden');
-                    container.querySelector('.play-btn').classList.remove('hidden');
-                }
-            });
+            // --- Audio Player & Accordion Logic ---
+            const allAudios=document.querySelectorAll('audio');const audioContainer=document.querySelector('.featured-zikir-container');function stopAllAudios(exceptAudio){allAudios.forEach(audio=>{if(audio!==exceptAudio){audio.pause();audio.currentTime=0;}});}
+            function resetAllPlayersUI(exceptContainer){document.querySelectorAll('.audio-controls-container').forEach(container=>{if(container!==exceptContainer){container.querySelector('.play-btn').classList.remove('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.stop-btn').classList.add('hidden');}});}
+            audioContainer.addEventListener('click',(e)=>{const playBtn=e.target.closest('.play-btn');const pauseBtn=e.target.closest('.pause-btn');const stopBtn=e.target.closest('.stop-btn');if(playBtn){const targetId=playBtn.dataset.target;const audio=document.getElementById(targetId);const container=playBtn.parentElement;stopAllAudios(audio);resetAllPlayersUI(container);audio.play();playBtn.classList.add('hidden');container.querySelector('.pause-btn').classList.remove('hidden');container.querySelector('.stop-btn').classList.remove('hidden');}
+            if(pauseBtn){const targetId=pauseBtn.dataset.target;const audio=document.getElementById(targetId);const container=pauseBtn.parentElement;audio.pause();pauseBtn.classList.add('hidden');container.querySelector('.play-btn').classList.remove('hidden');}
+            if(stopBtn){const targetId=stopBtn.dataset.target;const audio=document.getElementById(targetId);const container=stopBtn.parentElement;audio.pause();audio.currentTime=0;stopBtn.classList.add('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.play-btn').classList.remove('hidden');}});allAudios.forEach(audio=>{audio.addEventListener('ended',()=>{const container=document.querySelector(`.play-btn[data-target="${audio.id}"]`).parentElement;container.querySelector('.play-btn').classList.remove('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.stop-btn').classList.add('hidden');});});
+            const dhikrContainer=document.querySelector('.dhikr-container-new');if(dhikrContainer){const slider=dhikrContainer.querySelector('.dhikr-slider-new');const slides=dhikrContainer.querySelectorAll('.dhikr-slide-new');const nextBtn=dhikrContainer.querySelector('.slider-nav-new.next');const prevBtn=dhikrContainer.querySelector('.slider-nav-new.prev');const totalSlides=slides.length;let currentIndex=0;const goToSlide=(index)=>{if(index<0)index=0;if(index>=totalSlides)index=totalSlides-1;slider.style.transform=`translateX(-${index*100}%)`;currentIndex=index;updateSlideState(currentIndex);};const updateSlideState=(index)=>{slides.forEach((slide,i)=>{if(i===index){initializeCounter(slide);}});};
+            const initializeCounter=(slide)=>{const counterBtn=slide.querySelector('.progress-counter');const countDisplay=slide.querySelector('.count-display-new');const ring=slide.querySelector('.progress-ring__circle');const progressBarFill=slide.querySelector('.progress-bar-fill');const resetBtn=slide.querySelector('.reset-btn-new');const maxCount=parseInt(counterBtn.dataset.max);let count=0;const radius=ring.r.baseVal.value;const circumference=2*Math.PI*radius;ring.style.strokeDasharray=`${circumference} ${circumference}`;const setProgress=(percent)=>{const offset=circumference-(percent/100)*circumference;ring.style.strokeDashoffset=offset;const overallProgress=(currentIndex/(totalSlides-1))*100;progressBarFill.style.width=`${overallProgress}%`;};
+            const resetCounter=()=>{count=0;countDisplay.textContent=count;setProgress(0);};resetCounter();const newCounterBtn=counterBtn.cloneNode(true);counterBtn.parentNode.replaceChild(newCounterBtn,counterBtn);const newResetBtn=resetBtn.cloneNode(true);resetBtn.parentNode.replaceChild(newResetBtn,resetBtn);newCounterBtn.addEventListener('click',()=>{count++;if(count>maxCount)count=maxCount;countDisplay.textContent=count;const progressPercent=(count/maxCount)*100;setProgress(progressPercent);if(navigator.vibrate)navigator.vibrate(50);if(count===maxCount){if(currentIndex<totalSlides-1){setTimeout(()=>goToSlide(currentIndex+1),500);}else{newCounterBtn.style.backgroundColor='var(--secondary-color)';}}});newResetBtn.addEventListener('click',resetCounter);};
+            nextBtn.addEventListener('click',()=>goToSlide(currentIndex+1));prevBtn.addEventListener('click',()=>goToSlide(currentIndex-1));goToSlide(0);const shortcutLink=document.querySelector('a[href="#dzikir-bada-sholat"]');if(shortcutLink){shortcutLink.addEventListener('click',(e)=>{e.preventDefault();const targetId='dzikir-bada-sholat-section';sections.forEach(section=>section.classList.remove('active'));const targetSection=document.getElementById(targetId);if(targetSection){targetSection.classList.add('active');goToSlide(0);}
+            window.scrollTo(0,0);});}}
+            const prayerStepHeaders=document.querySelectorAll('.step-header');prayerStepHeaders.forEach(header=>{header.addEventListener('click',()=>{const content=header.nextElementSibling;header.classList.toggle('active');if(content.style.maxHeight){content.style.maxHeight=null;}else{content.style.maxHeight=content.scrollHeight+"px";}});});
             
-            allAudios.forEach(audio => {
-                audio.addEventListener('ended', () => {
-                    const container = document.querySelector(`.play-btn[data-target="${audio.id}"]`).parentElement;
-                    container.querySelector('.play-btn').classList.remove('hidden');
-                    container.querySelector('.pause-btn').classList.add('hidden');
-                    container.querySelector('.stop-btn').classList.add('hidden');
+            // --- Logika untuk Arah Kiblat ---
+            function setupQiblaFeature() {
+                window.isQiblaActive = false;
+                const permissionPromptEl = document.getElementById('kiblat-permission-prompt');
+                const permissionBtn = document.getElementById('kiblat-permission-btn');
+                const compassUiContainer = document.querySelector('.compass-ui-container');
+                const compassCircleEl = document.getElementById('qibla-compass-circle');
+                const roseEl = document.getElementById('compass-rose');
+                const pointerEl = document.getElementById('qibla-pointer');
+                const degreeDisplayEl = document.querySelector('.direction-degree');
+                let orientationSensor = null;
+
+                function calculateQiblaBearing(lat, lon) {
+                    const toRad = (deg) => deg * Math.PI / 180;
+                    const kaabaLat = toRad(21.4225);
+                    const userLat = toRad(lat);
+                    const dLon = toRad(39.8262 - lon);
+                    const y = Math.sin(dLon) * Math.cos(kaabaLat);
+                    const x = Math.cos(userLat) * Math.sin(kaabaLat) - Math.sin(userLat) * Math.cos(kaabaLat) * Math.cos(dLon);
+                    return (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
+                }
+
+                function getHeadingFromQuaternion(quaternion) {
+                    const [x, y, z, w] = quaternion;
+                    let yawRad = Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
+                    return (360 - (yawRad * (180 / Math.PI))) % 360;
+                };
+
+                async function startCompass() {
+                    window.isQiblaActive = true;
+                    compassUiContainer.style.display = 'flex';
+                    permissionPromptEl.style.display = 'none';
+                    degreeDisplayEl.innerHTML = 'Mendapatkan lokasi & kalibrasi...';
+
+                    try {
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                enableHighAccuracy: true, timeout: 15000, maximumAge: 0
+                            });
+                        });
+                        const qiblaBearing = calculateQiblaBearing(position.coords.latitude, position.coords.longitude);
+                        degreeDisplayEl.textContent = `Arah Kiblat: ${qiblaBearing.toFixed(1)}°`;
+
+                        if ('AbsoluteOrientationSensor' in window) {
+                            orientationSensor = new AbsoluteOrientationSensor({ frequency: 60 });
+                            orientationSensor.onreading = () => {
+                                if (!orientationSensor.quaternion) return;
+                                const trueHeading = getHeadingFromQuaternion(orientationSensor.quaternion);
+                                const roseRotation = -trueHeading;
+                                const pointerRotation = qiblaBearing - trueHeading;
+                                roseEl.style.transform = `rotate(${roseRotation}deg)`;
+                                pointerEl.style.transform = `rotate(${pointerRotation}deg)`;
+                                const alignmentCheck = Math.abs(pointerRotation % 360);
+                                if (alignmentCheck < 2.5 || alignmentCheck > 357.5) {
+                                    compassCircleEl.classList.add('aligned');
+                                    degreeDisplayEl.textContent = '✓ Arah Kiblat Tepat';
+                                } else {
+                                    compassCircleEl.classList.remove('aligned');
+                                    degreeDisplayEl.innerHTML = `Putar ponsel Anda hingga ikon Ka'bah 🕋 lurus ke atas.`;
+                                }
+                            };
+                            orientationSensor.onerror = (event) => { degreeDisplayEl.textContent = 'Error: Sensor tidak berfungsi.'; };
+                            orientationSensor.start();
+                        } else {
+                           degreeDisplayEl.textContent = 'Error: Sensor tidak didukung.';
+                        }
+                    } catch (error) {
+                        degreeDisplayEl.textContent = 'Gagal mendapatkan lokasi. Pastikan GPS aktif.';
+                        window.isQiblaActive = false;
+                    }
+                }
+                
+                window.stopQiblaCompass = function() {
+                    if (orientationSensor) {
+                        orientationSensor.stop();
+                        orientationSensor = null;
+                    }
+                    window.isQiblaActive = false;
+                    compassCircleEl.classList.remove('aligned');
+                }
+
+                async function requestAndStart() {
+                    try {
+                        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                            const permissionState = await DeviceOrientationEvent.requestPermission();
+                            if (permissionState !== 'granted') {
+                                alert('Izin sensor gerak diperlukan untuk fitur kompas.');
+                                return;
+                            }
+                        }
+                        startCompass();
+                    } catch(error) {
+                        alert('Gagal meminta izin sensor. Pastikan browser Anda mendukungnya.');
+                    }
+                }
+                
+                permissionBtn.addEventListener('click', requestAndStart);
+            }
+            
+            // --- Logika untuk Tasbih Digital ---
+            function setupTasbihDigital() {
+                const tasbihSetupEl = document.getElementById('tasbih-setup');
+                const tasbihCounterEl = document.getElementById('tasbih-counter');
+                const dzikirSelect = document.getElementById('dzikir-select');
+                const customDzikirInput = document.getElementById('custom-dzikir-input');
+                const dzikirTargetInput = document.getElementById('dzikir-target');
+                const startBtn = document.getElementById('start-tasbih-btn');
+                const displayDzikirText = document.getElementById('display-dzikir-text');
+                const displayDzikirTarget = document.getElementById('display-dzikir-target');
+                const countDisplay = document.getElementById('tasbih-count-display');
+                const incrementBtn = document.getElementById('increment-tasbih-btn');
+                const resetCountBtn = document.getElementById('reset-count-btn');
+                const resetSetupLink = document.getElementById('reset-setup-link');
+
+                let currentCount = 0;
+                let targetCount = 0;
+
+                dzikirSelect.addEventListener('change', () => {
+                    customDzikirInput.style.display = (dzikirSelect.value === 'custom') ? 'block' : 'none';
                 });
-            });
+
+                startBtn.addEventListener('click', () => {
+                    const selectedDzikirValue = dzikirSelect.value;
+                    let dzikirText = (selectedDzikirValue === 'custom') ? customDzikirInput.value.trim() : selectedDzikirValue;
+                    const targetValue = parseInt(dzikirTargetInput.value, 10);
+
+                    if (!dzikirText || !targetValue || targetValue <= 0) {
+                        showCustomPopup({
+                            title: 'Input Tidak Valid',
+                            message: 'Silakan pilih/isi dzikir dan masukkan jumlah target yang benar.',
+                            iconHtml: '<i class="fas fa-exclamation-triangle" style="color: #FFC107;"></i>',
+                            primaryBtnText: 'Mengerti'
+                        });
+                        return;
+                    }
+
+                    targetCount = targetValue;
+                    currentCount = 0;
+                    displayDzikirText.textContent = dzikirText;
+                    displayDzikirTarget.textContent = `${targetCount}x`;
+                    countDisplay.textContent = currentCount;
+                    tasbihSetupEl.style.display = 'none';
+                    tasbihCounterEl.style.display = 'flex';
+                });
+
+                incrementBtn.addEventListener('click', () => {
+                    if (currentCount < targetCount) {
+                        currentCount++;
+                        countDisplay.textContent = currentCount;
+                        if (navigator.vibrate) navigator.vibrate(50);
+                        
+                        if (currentCount === targetCount) {
+                             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                             showCustomPopup({
+                                 title: 'Alhamdulillah!',
+                                 message: 'Anda telah menyelesaikan target dzikir. Semoga Allah menerima amalan kita.',
+                                 iconHtml: '<i class="fas fa-check-circle" style="color: var(--secondary-color);"></i>',
+                                 primaryBtnText: 'Selesai'
+                             });
+                        }
+                    }
+                });
+
+                resetCountBtn.addEventListener('click', () => {
+                    currentCount = 0;
+                    countDisplay.textContent = currentCount;
+                });
+
+                resetSetupLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    tasbihCounterEl.style.display = 'none';
+                    tasbihSetupEl.style.display = 'flex';
+                    dzikirSelect.value = '';
+                    customDzikirInput.value = '';
+                    customDzikirInput.style.display = 'none';
+                    dzikirTargetInput.value = '';
+                    currentCount = 0;
+                    targetCount = 0;
+                });
+            }
+
+            // Panggil semua fungsi setup
+            setupQiblaFeature();
+            setupTasbihDigital();
+
         });
     </script>
 </body>
-                                                                                                                                   </html>
+</html>
