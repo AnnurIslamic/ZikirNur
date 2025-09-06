@@ -245,6 +245,10 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
+            transition: opacity 0.5s ease;
+        }
+        .prayer-time-card.loading {
+            opacity: 0.7;
         }
         .prayer-time-card::before {
             content: '';
@@ -438,7 +442,6 @@
             border-radius: 15px;
             font-weight: 700;
             text-decoration: none;
-            margin-top: 2.5rem;
             box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
             transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
             font-size: 1.1rem;
@@ -449,6 +452,24 @@
             box-shadow: 0 8px 20px rgba(255, 193, 7, 0.5);
         }
         .survey-button i { font-size: 1.3rem; }
+
+        /** [MODIFIKASI] CSS BARU UNTUK SLIDER TOMBOL SURVEY **/
+        .survey-button-container {
+            margin-top: 2.5rem;
+            height: 65px; /* Sesuaikan tinggi agar pas dengan 1 tombol */
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .survey-slider {
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Animasi geser */
+        }
+        .survey-slider .survey-button {
+            margin-top: 0; /* Hapus margin atas dari tombol individu */
+            height: 65px; /* Pastikan tinggi setiap slide sama */
+            flex-shrink: 0; /* Mencegah slide menyusut */
+        }
+        /** AKHIR DARI CSS BARU **/
 
         .settings-container, .explanation-container { padding: 0 0.5rem; }
         .settings-list {
@@ -938,7 +959,21 @@
                 <a href="#doa-harian" class="shortcut-item nav-shortcut"><i class="fas fa-hands-praying shortcut-icon" aria-hidden="true"></i><span>Doa Harian</span></a>
                 <a href="#tasbih-digital" class="shortcut-item nav-shortcut"><i class="fas fa-calculator shortcut-icon" aria-hidden="true"></i><span>Penghitung Digital</span></a>
             </div>
-            <a href="#" class="survey-button"><i class="fas fa-clipboard-list" aria-hidden="true"></i> ISI SURVEY YUK</a>
+
+            <div class="survey-button-container">
+                <div class="survey-slider">
+                <a href="mailto:zikirn23@gmail.com" target="_blank" class="survey-button">
+                        <i class="fas fa-comment-dots" aria-hidden="true"></i> Saran & Masukan
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=your.app.id.here" target="_blank" class="survey-button" style="background-color: var(--primary-color); color: white;">
+                        <i class="fas fa-star" aria-hidden="true"></i> Dukung Aplikasi
+                    </a>
+                    <a href="https://forms.gle/WgPQVnNVuqd9WbQQA" target="_blank" class="survey-button">
+                        <i class="fas fa-clipboard-list" aria-hidden="true"></i> Isi Survey Yuk
+                    </a>
+                </div>
+            </div>
+
         </section>
         
         <section id="dzikir-bada-sholat-section" class="content-section">
@@ -1045,7 +1080,14 @@
                 <div class="prayer-step"> <button class="step-header"> <span>6. I'tidal (Bangkit dari Ruku')</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">سَمِعَ اللهُ لِمَنْ حَمِدَهُ</p> <p class="transliteration-text">Sami'allaahu liman hamidah</p> <p class="translation-text">"Allah Maha Mendengar orang yang memuji-Nya."</p> <hr style="border-color: var(--border-color); margin: 1rem 0;"> <p class="arabic-text">رَبَّنَا لَكَ الْحَمْدُ مِلْءَ السَّمَاوَاتِ وَمِلْءَ الْأَرْضِ وَمِلْءَ مَا شِئْتَ مِنْ شَيْءٍ بَعْدُ</p> <p class="transliteration-text">Robbanaa lakal hamdu mil'us samaawaati wa mil'ul ardhi wa mil'u maa syi'ta min syai'in ba'du</p> <p class="translation-text">"Ya Tuhan kami, bagi-Mu segala puji, sepenuh langit dan sepenuh bumi, dan sepenuh apa yang Engkau kehendaki setelah itu."</p> </div> </div> </div>
                 <div class="prayer-step"> <button class="step-header"> <span>7. Sujud</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">سُبْحَانَ رَبِّيَ الْأَعْلَى وَبِحَمْدِهِ</p> <p class="transliteration-text">Subhaana robbiyal a'laa wa bihamdih (3x)</p> <p class="translation-text">"Maha Suci Tuhanku Yang Maha Tinggi dan dengan memuji-Nya." (Dibaca 3 kali)</p> </div> </div> </div>
                 <div class="prayer-step"> <button class="step-header"> <span>8. Duduk di Antara Dua Sujud</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَاجْبُرْنِي وَارْفَعْنِي وَارْزُقْنِي وَاهْدِنِي وَعَافِنِي وَاعْفُ عَنِّي</p> <p class="transliteration-text">Robbighfirlii warhamnii wajburnii warfa'nii warzuqnii wahdinii wa'aafinii wa'fu 'annii</p> <p class="translation-text">"Ya Tuhanku, ampunilah aku, rahmatilah aku, cukupkanlah aku, angkatlah derajatku, berilah aku rezeki, berilah aku petunjuk, sehatkanlah aku, dan maafkanlah aku."</p> </div> </div> </div>
-                <div class="prayer-step"> <button class="step-header"> <span>9. Tasyahud Akhir</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text" style="font-size: 1.4rem; line-height: 2.2;">التَّحِيَّاتُ الْمُبَارَكَاتُ الصَّلَوَاتُ الطَّيِّبَاتُ لِلَّهِ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ، اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى سَيِّدِنَا إِبْرَاهِيمَ وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيمَ، وَبَارِكْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى سَيِّدِنَا إِبْرَاهِيمَ وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيمَ، فِي الْعَالَمِينَ إِنَّكَ حَمِيدٌ مَجِيدٌ</p> <p class="step-note">Untuk Tasyahud Awal (pada sholat Dzuhur, Ashar, Maghrib, Isya), bacaan hanya sampai "wa asyhadu anna Muhammadar rasuulullah".</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>9. Tasyahud Akhir</span> <i class="fas fa-plus step-icon"></i> </button> 
+                    <div class="step-content"> 
+                        <div class="content-wrapper"> 
+                            <p class="arabic-text" style="font-size: 1.4rem; line-height: 2.2;">التَّحِيَّاتُ الْمُبَارَكَاتُ الصَّلَوَاتُ الطَّيِّبَاتُ لِلَّهِ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ، اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى سَيِّدِنَا إِبْرَاهِيمَ وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيمَ، وَبَارِكْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى سَيِّدِنَا إِبْرَاهِيمَ وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيمَ، فِي الْعَالَمِينَ إِنَّكَ حَمِيدٌ مَجِيدٌ</p> 
+                            <p class="step-note">Untuk Tasyahud Awal (pada sholat Dzuhur, Ashar, Maghrib, Isya), bacaan hanya sampai "wa asyhadu anna Muhammadar rasuulullah".</p> 
+                        </div> 
+                    </div> 
+                </div>
                 <div class="prayer-step"> <button class="step-header"> <span>10. Salam</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">السَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللهِ</p> <p class="transliteration-text">Assalaamu 'alaikum wa rahmatullah</p> <p class="translation-text">"Keselamatan dan rahmat Allah semoga tercurah atas kalian."</p> <p class="step-note">Mengucapkan salam sambil menoleh ke kanan, kemudian menoleh ke kiri.</p> </div> </div> </div>
             </div>
         </section>
@@ -1053,7 +1095,7 @@
         <section id="doa-nabi-section" class="content-section">
             <h2>Kumpulan Doa Para Nabi</h2>
             <div class="prayer-guide-container">
-                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Adam AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبَّنَا ظَلَمْنَا أَنْفُਸَنَا وَإِنْ لَمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ</p> <p class="transliteration-text">Robbanaa zholamnaa anfusanaa wa illam taghfirlanaa wa tarhamnaa lanakuunanna minal khoosiriin.</p> <p class="translation-text">"Ya Tuhan kami, kami telah menzalimi diri kami sendiri. Jika Engkau tidak mengampuni kami dan memberi rahmat kepada kami, niscaya kami termasuk orang-orang yang rugi."</p> <p class="step-note">QS. Al-A'raf: 23</p> </div> </div> </div>
+                <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Adam AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبَّنَا ظَلَمْنَا أَنْفُسَنَا وَإِنْ لَمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ</p> <p class="transliteration-text">Robbanaa zholamnaa anfusanaa wa illam taghfirlanaa wa tarhamnaa lanakuunanna minal khoosiriin.</p> <p class="translation-text">"Ya Tuhan kami, kami telah menzalimi diri kami sendiri. Jika Engkau tidak mengampuni kami dan memberi rahmat kepada kami, niscaya kami termasuk orang-orang yang rugi."</p> <p class="step-note">QS. Al-A'raf: 23</p> </div> </div> </div>
                 <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Nuh AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبِّ إِنِّي أَعُوذُ بِكَ أَنْ أَسْأَلَكَ مَا لَيْسَ لِي بِهِ عِلْمٌ ۖ وَإِلَّا تَغْفِرْ لِي وَتَرْحَمْنِي أَكُنْ مِنَ الْخَاسِرِينَ</p> <p class="transliteration-text">Rabbi innī a'ụżu bika an as`alaka mā laisa lī bihī 'ilm, wa illā tagfirlī wa tar-ḥamnī akum minal-khāsirīn.</p> <p class="translation-text">"Ya Tuhanku, sesungguhnya aku berlindung kepada-Mu untuk memohon sesuatu yang aku tidak mengetahui (hakikatnya). Kalau Engkau tidak mengampuniku dan menaruh belas kasihan kepadaku, niscaya aku termasuk orang yang rugi."</p> <p class="step-note">QS. Hud: 47</p> </div> </div> </div>
                 <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Ibrahim AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">رَبِّ هَبْ لِي مِنَ الصَّالِحِينَ</p> <p class="transliteration-text">Rabbi hab lī minaṣ-ṣāliḥīn.</p> <p class="translation-text">"Ya Tuhanku, anugerahkanlah kepadaku (seorang anak) yang termasuk orang yang saleh."</p> <p class="step-note">QS. As-Saffat: 100</p> </div> </div> </div>
                 <div class="prayer-step"> <button class="step-header"> <span>Doa Nabi Yunus AS</span> <i class="fas fa-plus step-icon"></i> </button> <div class="step-content"> <div class="content-wrapper"> <p class="arabic-text">لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ</p> <p class="transliteration-text">Lā ilāha illā anta sub-ḥānaka innī kuntu minaẓ-ẓālimīn.</p> <p class="translation-text">"Tidak ada tuhan selain Engkau, Mahasuci Engkau. Sungguh, aku termasuk orang-orang yang zalim."</p> <p class="step-note">QS. Al-Anbiya: 87</p> </div> </div> </div>
@@ -1339,7 +1381,7 @@
             <div class="explanation-container" style="text-align: center; padding-top: 2rem;">
                 <p style="font-size: 1.1rem; margin-bottom: 1rem;">Kami sangat menghargai setiap masukan dari Anda untuk menjadikan ZikirNur lebih baik.</p>
                 <p>Apakah Anda menemukan bug, memiliki ide untuk fitur baru, atau hanya ingin menyapa? Jangan ragu untuk menghubungi kami!</p>
-                <a href="mailto:feedback.zikirnur@email.com" class="survey-button" style="margin-top: 2rem; text-decoration: none;">
+                <a href="mailto:zikirn23@gmail.com" class="survey-button" style="margin-top: 2rem; text-decoration: none;">
                     <i class="fas fa-envelope"></i> Kirim Email kepada Kami
                 </a>
                 <p style="margin-top: 2rem; color: var(--icon-color);">Setiap saran Anda sangat berarti bagi pengembangan aplikasi ini ke depannya. Terima kasih telah menjadi bagian dari perjalanan ZikirNur.</p>
@@ -1385,6 +1427,8 @@
             const popupMessage = document.getElementById('popup-message');
             const popupAllowBtn = document.getElementById('popup-allow-btn');
             const popupDenyBtn = document.getElementById('popup-deny-btn');
+
+            const prayerTimeCard = document.querySelector('.prayer-time-card');
 
             // --- Sidebar Logic ---
             function openSidebar() { sidebar.classList.add('active'); sidebarOverlay.classList.add('active'); }
@@ -1494,7 +1538,21 @@
             }
 
             // --- Prayer Times & Permissions Logic ---
-
+            
+            function showPrayerCardLoading(isLoading) {
+                if (isLoading) {
+                    prayerTimeCard.classList.add('loading');
+                    locationDisplay.textContent = 'Memperbarui lokasi & jadwal...';
+                    document.getElementById('currentDateHijri').textContent = '';
+                    document.querySelectorAll('.prayer-time-item').forEach(item => item.classList.remove('next-prayer'));
+                    document.querySelectorAll('#prayerTimesGrid strong').forEach(el => {
+                        el.textContent = '...';
+                    });
+                } else {
+                    prayerTimeCard.classList.remove('loading');
+                }
+            }
+            
             refreshLocationBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const icon = refreshLocationBtn.querySelector('i');
@@ -1504,35 +1562,36 @@
                     title: 'Refresh Lokasi',
                     message: 'Kami akan mencoba mendeteksi ulang lokasi Anda. Pastikan GPS aktif.',
                     iconHtml: '<i class="fas fa-map-marker-alt"></i>',
-                    onAllow: () => { requestLocationAccess(true); }, // true for manual refresh
+                    onAllow: () => {
+                        showPrayerCardLoading(true);
+                        requestLocationAccess(true);
+                    },
                     onDeny: () => {}
                 });
             });
 
             locationToggle.addEventListener('change', (e) => {
                 if (e.target.checked) {
-                    // Hanya minta izin jika belum pernah diberikan
                     if (localStorage.getItem('locationAccess') !== 'granted') {
-                        e.preventDefault(); // Mencegah toggle langsung aktif
+                        e.preventDefault();
                         showPermissionPopup({
                             title: 'Izin Lokasi',
                             message: 'ZikirNur memerlukan akses lokasi Anda untuk menampilkan waktu sholat yang akurat. Data lokasi tidak akan dibagikan.',
                             iconHtml: '<i class="fas fa-map-marker-alt"></i>',
                             onAllow: () => {
-                                locationToggle.checked = true; // Aktifkan toggle setelah izin
+                                locationToggle.checked = true;
                                 requestLocationAccess();
                             },
                             onDeny: () => {
-                                locationToggle.checked = false; // Biarkan toggle mati
+                                locationToggle.checked = false;
                             }
                         });
                     }
                 } else {
-                    // Jika toggle dimatikan, hapus data dan kembali ke default
                     localStorage.removeItem('userLocation');
                     localStorage.setItem('locationAccess', 'denied');
                     locationDisplay.textContent = 'Medan, Sumatera Utara';
-                    fetchPrayerTimes(); // Ambil data default
+                    fetchPrayerTimes();
                 }
             });
 
@@ -1569,14 +1628,13 @@
                     refreshIcon.classList.add('refreshing');
                 }
                 if ('geolocation' in navigator) {
-                    locationDisplay.textContent = 'Mendapatkan lokasi...';
                     navigator.geolocation.getCurrentPosition(
                         position => {
                             const { latitude, longitude } = position.coords;
                             localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
                             localStorage.setItem('locationAccess', 'granted');
                             locationToggle.checked = true;
-                            fetchCityName(latitude, longitude);
+                            fetchCityName(latitude, longitude); 
                             fetchPrayerTimes(latitude, longitude);
                             if (isManualRefresh) refreshIcon.classList.remove('refreshing');
                         },
@@ -1585,7 +1643,13 @@
                             locationToggle.checked = false;
                             localStorage.setItem('locationAccess', 'denied');
                             locationDisplay.textContent = 'Gagal, kembali ke default.';
-                            setTimeout(() => { locationDisplay.textContent = 'Medan, Sumatera Utara'; }, 1500);
+                            fetchPrayerTimes(); 
+                            setTimeout(() => { 
+                                if (!localStorage.getItem('userLocation')) {
+                                    locationDisplay.textContent = 'Medan, Sumatera Utara';
+                                }
+                                showPrayerCardLoading(false); 
+                            }, 1500);
                             if (isManualRefresh) refreshIcon.classList.remove('refreshing');
                         }
                     );
@@ -1593,6 +1657,7 @@
                     alert('Geolocation tidak didukung oleh browser Anda.');
                     locationToggle.checked = false;
                     if (isManualRefresh) refreshIcon.classList.remove('refreshing');
+                    showPrayerCardLoading(false);
                 }
             }
 
@@ -1630,14 +1695,11 @@
             }
 
             function initializePermissions() {
-                // *** PERUBAHAN LOGIKA UTAMA DI SINI ***
                 if (localStorage.getItem('locationAccess') === 'granted') {
                     locationToggle.checked = true;
-                    // Langsung coba akses lokasi tanpa bertanya lagi
                     requestLocationAccess(); 
                 } else {
                     locationToggle.checked = false;
-                    // Jika tidak ada izin, gunakan data default
                     fetchPrayerTimes(); 
                 }
 
@@ -1686,6 +1748,8 @@
                     console.error("Gagal mengambil data waktu sholat:", error);
                     const prayerGrid = document.getElementById('prayerTimesGrid');
                     if (prayerGrid) { prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`; }
+                } finally {
+                    showPrayerCardLoading(false);
                 }
             }
 
@@ -1699,7 +1763,7 @@
                     const timeEl = document.getElementById(`time-${prayer}`);
                     if (!timeEl) continue;
                     const timeStr = timeEl.textContent;
-                    if (timeStr === '--:--') continue;
+                    if (timeStr === '--:--' || timeStr === '...') continue;
                     const [h, m] = timeStr.split(':').map(Number);
                     const prayerTime = h * 60 + m;
                     if (currentTime < prayerTime) {
@@ -1911,9 +1975,28 @@
                 });
             }
 
+            // --- [MODIFIKASI] Logika untuk slider tombol ---
+            function setupButtonSlider() {
+                const slider = document.querySelector('.survey-slider');
+                if (!slider) return;
+
+                const slides = slider.querySelectorAll('.survey-button');
+                const slideCount = slides.length;
+                if (slideCount === 0) return;
+
+                const slideHeight = slides[0].offsetHeight;
+                let currentSlide = 0;
+
+                setInterval(() => {
+                    currentSlide = (currentSlide + 1) % slideCount;
+                    slider.style.transform = `translateY(-${currentSlide * slideHeight}px)`;
+                }, 5000); // Ganti setiap 5 detik
+            }
+
             // Panggil semua fungsi setup
             setupQiblaFeature();
             setupTasbihDigital();
+            setupButtonSlider(); // <-- Panggil fungsi baru ini
 
         });
     </script>
