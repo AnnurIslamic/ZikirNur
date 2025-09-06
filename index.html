@@ -1766,6 +1766,17 @@
                         document.getElementById('currentDateHijri').textContent = `${hijri.weekday.ar}, ${hijri.day} ${hijri.month.ar} ${hijri.year} H`;
                         highlightNextPrayer();
                     }
+                    
+                                // [TAMBAHAN] Simpan jadwal sholat ke variabel global
+                todayPrayerTimes = {
+                    Imsak: document.getElementById('time-Imsak').textContent,
+                    Fajr: document.getElementById('time-Fajr').textContent,
+                    Dhuhr: document.getElementById('time-Dhuhr').textContent,
+                    Asr: document.getElementById('time-Asr').textContent,
+                    Maghrib: document.getElementById('time-Maghrib').textContent,
+                    Isha: document.getElementById('time-Isha').textContent
+                };
+                    
                 } catch (error) {
                     console.error("Gagal mengambil data waktu sholat:", error);
                     const prayerGrid = document.getElementById('prayerTimesGrid');
@@ -1774,6 +1785,8 @@
                     showPrayerCardLoading(false);
                 }
             }
+            
+            
 
             function highlightNextPrayer() {
                 const now = new Date();
@@ -2021,6 +2034,40 @@
             setupButtonSlider(); // <-- Panggil fungsi baru ini
 
         });
+            // [BARU] Fungsi untuk memeriksa waktu sholat dan memutar Adzan
+    function checkAndPlayAdzan() {
+        if (!todayPrayerTimes || Object.keys(todayPrayerTimes).length === 0) {
+            return; // Belum ada jadwal sholat
+        }
+
+        const now = new Date();
+        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        
+        // Cek apakah notifikasi diizinkan oleh pengguna
+        const notificationEnabled = document.getElementById('notification-toggle').checked;
+        if (!notificationEnabled) return;
+
+        // Cek setiap waktu sholat
+        for (const prayerName in todayPrayerTimes) {
+            if (todayPrayerTimes[prayerName] === currentTime) {
+                let soundType = '';
+                if (prayerName === 'Imsak') {
+                    soundType = 'imsak';
+                } else if (prayerName === 'Fajr') {
+                    soundType = 'subuh';
+                } else if (['Dhuhr', 'Asr', 'Maghrib', 'Isha'].includes(prayerName)) {
+                    soundType = 'adzan';
+                }
+
+                if (soundType && window.Android && typeof window.Android.playAdzan === 'function') {
+                    // Kirim sinyal ke Kotlin untuk memutar suara
+                    window.Android.playAdzan(soundType);
+                    console.log(`Waktu ${prayerName} telah masuk. Memainkan suara: ${soundType}`);
+                    break; // Hentikan loop setelah menemukan waktu yang cocok
+                }
+            }
+        }
+    }
     </script>
 </body>
 </html>
