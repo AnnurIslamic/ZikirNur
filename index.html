@@ -1404,637 +1404,619 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Elements ---
-            const openSidebarBtn = document.getElementById('openSidebarBtn');
-            const sidebar = document.getElementById('mySidebar');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const shortcutLinks = document.querySelectorAll('.nav-shortcut');
-            const sections = document.querySelectorAll('.content-section');
-            const darkModeToggle = document.getElementById('dark-mode-toggle');
-            const autoModeToggle = document.getElementById('auto-mode-toggle');
-            const darkModeIcon = document.getElementById('darkModeIcon');
-            const locationToggle = document.getElementById('location-access-toggle');
-            const notificationToggle = document.getElementById('notification-toggle');
-            const soundToggle = document.getElementById('sound-toggle');
-            const locationDisplay = document.querySelector('.card-location');
-            
-            const refreshLocationBtn = document.getElementById('refresh-location-btn');
-            const popup = document.getElementById('permission-popup');
-            const popupIcon = document.getElementById('popup-icon-container');
-            const popupTitle = document.getElementById('popup-title');
-            const popupMessage = document.getElementById('popup-message');
-            const popupAllowBtn = document.getElementById('popup-allow-btn');
-            const popupDenyBtn = document.getElementById('popup-deny-btn');
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Elements ---
+        const openSidebarBtn = document.getElementById('openSidebarBtn');
+        const sidebar = document.getElementById('mySidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const shortcutLinks = document.querySelectorAll('.nav-shortcut');
+        const sections = document.querySelectorAll('.content-section');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const autoModeToggle = document.getElementById('auto-mode-toggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const locationToggle = document.getElementById('location-access-toggle');
+        const notificationToggle = document.getElementById('notification-toggle');
+        const soundToggle = document.getElementById('sound-toggle');
+        const locationDisplay = document.querySelector('.card-location');
+        
+        const refreshLocationBtn = document.getElementById('refresh-location-btn');
+        const popup = document.getElementById('permission-popup');
+        const popupIcon = document.getElementById('popup-icon-container');
+        const popupTitle = document.getElementById('popup-title');
+        const popupMessage = document.getElementById('popup-message');
+        const popupAllowBtn = document.getElementById('popup-allow-btn');
+        const popupDenyBtn = document.getElementById('popup-deny-btn');
 
-            const prayerTimeCard = document.querySelector('.prayer-time-card');
+        const prayerTimeCard = document.querySelector('.prayer-time-card');
+        let todayPrayerTimes = {};
 
-            // --- Sidebar Logic ---
-            function openSidebar() { sidebar.classList.add('active'); sidebarOverlay.classList.add('active'); }
-            function closeSidebar() { sidebar.classList.remove('active'); sidebarOverlay.classList.remove('active'); }
-            openSidebarBtn.addEventListener('click', openSidebar);
-            sidebarOverlay.addEventListener('click', closeSidebar);
-            
-            // --- Shortcut Ikon Info ke Pengaturan ---
-            const infoToSettingsBtn = document.getElementById('infoToSettingsBtn');
-            infoToSettingsBtn.addEventListener('click', () => {
-                document.querySelectorAll('.content-section').forEach(section => {
-                    section.classList.remove('active');
-                });
-                document.getElementById('pengaturan-section').classList.add('active');
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('current-page');
-                });
-                document.querySelector('a[href="#pengaturan"]').classList.add('current-page');
-                window.scrollTo(0, 0);
+        // --- Sidebar Logic ---
+        function openSidebar() { sidebar.classList.add('active'); sidebarOverlay.classList.add('active'); }
+        function closeSidebar() { sidebar.classList.remove('active'); sidebarOverlay.classList.remove('active'); }
+        openSidebarBtn.addEventListener('click', openSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+        
+        // --- Shortcut Ikon Info ke Pengaturan ---
+        const infoToSettingsBtn = document.getElementById('infoToSettingsBtn');
+        infoToSettingsBtn.addEventListener('click', () => {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
             });
-
-            // --- Navigation Logic ---
-            function handleNavigation(e) {
-                e.preventDefault();
-                const targetId = e.currentTarget.getAttribute('href').substring(1) + '-section';
-                
-                const correspondingSidebarLink = document.querySelector(`.sidebar-nav-list a[href="${e.currentTarget.getAttribute('href')}"]`);
-                if (correspondingSidebarLink) {
-                    navLinks.forEach(l => l.classList.remove('current-page'));
-                    correspondingSidebarLink.classList.add('current-page');
-                }
-
-                sections.forEach(section => section.classList.remove('active'));
-                const targetSection = document.getElementById(targetId);
-                if (targetSection) {
-                    targetSection.classList.add('active');
-                }
-
-                if(window.isQiblaActive && targetId !== 'kiblat-section') {
-                    const stopQiblaCompass = window.stopQiblaCompass;
-                    if(typeof stopQiblaCompass === 'function') {
-                        stopQiblaCompass();
-                    }
-                }
-
-                closeSidebar();
-                window.scrollTo(0, 0);
-            }
-
-            navLinks.forEach(link => { link.addEventListener('click', handleNavigation); });
-            shortcutLinks.forEach(link => { link.addEventListener('click', handleNavigation); });
-            
-            document.querySelector('.sidebar-nav-list a[href="#dashboard"]').classList.add('current-page');
-            document.getElementById('dashboard-section').classList.add('active');
-
-            // --- Dark Mode Logic ---
-            let autoModeInterval; function setMode(isDark){const moonIconBtn=document.getElementById('darkModeIcon');if(isDark){document.body.classList.add('dark-mode');moonIconBtn.classList.add('dark-mode-active');}else{document.body.classList.remove('dark-mode');moonIconBtn.classList.remove('dark-mode-active');}}
-            function checkAutoMode(){const isNight=new Date().getHours()>=18||new Date().getHours()<6;setMode(isNight);}
-            function applySavedMode(){const savedMode=localStorage.getItem('themeMode')||'auto';if(savedMode==='dark'){setMode(true);darkModeToggle.checked=true;autoModeToggle.checked=false;}else if(savedMode==='light'){setMode(false);darkModeToggle.checked=false;autoModeToggle.checked=false;}else{autoModeToggle.checked=true;darkModeToggle.disabled=true;checkAutoMode();autoModeInterval=setInterval(checkAutoMode,60000);}}
-            darkModeToggle.addEventListener('change',()=>{localStorage.setItem('themeMode',darkModeToggle.checked?'dark':'light');applySavedMode();});autoModeToggle.addEventListener('change',()=>{clearInterval(autoModeInterval);if(autoModeToggle.checked){localStorage.setItem('themeMode','auto');darkModeToggle.checked=false;darkModeToggle.disabled=true;checkAutoMode();autoModeInterval=setInterval(checkAutoMode,60000);}else{darkModeToggle.disabled=false;localStorage.setItem('themeMode','light');}
-            applySavedMode();});darkModeIcon.addEventListener('click',()=>{const isCurrentlyDark=document.body.classList.contains('dark-mode');autoModeToggle.checked=false;darkModeToggle.disabled=false;darkModeToggle.checked=!isCurrentlyDark;localStorage.setItem('themeMode',!isCurrentlyDark?'dark':'light');applySavedMode();});applySavedMode();
-
-            // --- Popup Logic ---
-            function hidePermissionPopup(){ popup.classList.remove('active'); }
-
-            function showPermissionPopup({title,message,iconHtml,onAllow,onDeny}){
-                popupTitle.textContent=title;
-                popupMessage.textContent=message;
-                popupIcon.innerHTML=iconHtml;
-                
-                popupDenyBtn.style.display = 'block';
-                popupAllowBtn.textContent = 'Izinkan';
-
-                const newAllowBtn=popupAllowBtn.cloneNode(true);
-                popupAllowBtn.parentNode.replaceChild(newAllowBtn,popupAllowBtn);
-                
-                const newDenyBtn=popupDenyBtn.cloneNode(true);
-                popupDenyBtn.parentNode.replaceChild(newDenyBtn,popupDenyBtn);
-                
-                newAllowBtn.addEventListener('click',()=>{onAllow();hidePermissionPopup();});
-                newDenyBtn.addEventListener('click',()=>{onDeny();hidePermissionPopup();});
-                
-                popup.classList.add('active');
-            }
-            
-            function showCustomPopup({title, message, iconHtml, primaryBtnText, onPrimaryClick}) {
-                popupTitle.textContent = title;
-                popupMessage.textContent = message;
-                popupIcon.innerHTML = iconHtml;
-                const denyBtn = document.getElementById('popup-deny-btn');
-                denyBtn.style.display = 'none';
-                const allowBtn = document.getElementById('popup-allow-btn');
-                allowBtn.textContent = primaryBtnText || 'OK';
-                const newAllowBtn = allowBtn.cloneNode(true);
-                allowBtn.parentNode.replaceChild(newAllowBtn, allowBtn);
-                
-                newAllowBtn.addEventListener('click', () => {
-                    if(onPrimaryClick) onPrimaryClick();
-                    hidePermissionPopup();
-                    setTimeout(() => {
-                        denyBtn.style.display = 'block';
-                        newAllowBtn.textContent = 'Izinkan';
-                    }, 300);
-                });
-
-                popup.classList.add('active');
-            }
-
-            // --- Prayer Times & Permissions Logic ---
-            
-            function showPrayerCardLoading(isLoading) {
-                if (isLoading) {
-                    prayerTimeCard.classList.add('loading');
-                    locationDisplay.textContent = 'Memperbarui lokasi & jadwal...';
-                    document.getElementById('currentDateHijri').textContent = '';
-                    document.querySelectorAll('.prayer-time-item').forEach(item => item.classList.remove('next-prayer'));
-                    document.querySelectorAll('#prayerTimesGrid strong').forEach(el => {
-                        el.textContent = '...';
-                    });
-                } else {
-                    prayerTimeCard.classList.remove('loading');
-                }
-            }
-            
-            refreshLocationBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const icon = refreshLocationBtn.querySelector('i');
-                if (icon.classList.contains('refreshing')) return;
-
-                showPermissionPopup({
-                    title: 'Refresh Lokasi',
-                    message: 'Kami akan mencoba mendeteksi ulang lokasi Anda. Pastikan GPS aktif.',
-                    iconHtml: '<i class="fas fa-map-marker-alt"></i>',
-                    onAllow: () => {
-                        showPrayerCardLoading(true);
-                        requestLocationAccess(true);
-                    },
-                    onDeny: () => {}
-                });
+            document.getElementById('pengaturan-section').classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('current-page');
             });
-
-            locationToggle.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    if (localStorage.getItem('locationAccess') !== 'granted') {
-                        e.preventDefault();
-                        showPermissionPopup({
-                            title: 'Izin Lokasi',
-                            message: 'ZikirNur memerlukan akses lokasi Anda untuk menampilkan waktu sholat yang akurat. Data lokasi tidak akan dibagikan.',
-                            iconHtml: '<i class="fas fa-map-marker-alt"></i>',
-                            onAllow: () => {
-                                locationToggle.checked = true;
-                                requestLocationAccess();
-                            },
-                            onDeny: () => {
-                                locationToggle.checked = false;
-                            }
-                        });
-                    }
-                } else {
-                    localStorage.removeItem('userLocation');
-                    localStorage.setItem('locationAccess', 'denied');
-                    locationDisplay.textContent = 'Medan, Sumatera Utara';
-                    fetchPrayerTimes();
-                }
-            });
-
-            notificationToggle.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    e.preventDefault();
-                    showPermissionPopup({
-                        title: 'Izin Notifikasi',
-                        message: 'Izinkan notifikasi agar kami dapat mengingatkan Anda saat waktu sholat tiba (adzan).',
-                        iconHtml: '<i class="fas fa-bell"></i>',
-                        onAllow: () => {
-                            notificationToggle.checked = true;
-                            requestNotificationPermission();
-                        },
-                        onDeny: () => {
-                            notificationToggle.checked = false;
-                        }
-                    });
-                } else {
-                    localStorage.setItem('notificationPermission', 'denied');
-                    soundToggle.checked = false;
-                    soundToggle.disabled = true;
-                    localStorage.setItem('soundPermission', 'denied');
-                }
-            });
-
-            soundToggle.addEventListener('change', () => {
-                localStorage.setItem('soundPermission', soundToggle.checked ? 'granted' : 'denied');
-            });
-
-
-    function requestLocationAccess() {
-        if (window.Android && typeof window.Android.requestNativeLocationPermission === 'function') {
-            // Panggil fungsi di Kotlin
-            window.Android.requestNativeLocationPermission();
-        } else {
-            // Fallback jika tidak berjalan di aplikasi (misal di browser biasa)
-            alert("Fitur ini hanya berfungsi di dalam aplikasi Android.");
-        }
-    }
-
-    function requestNotificationPermission() {
-        if (window.Android && typeof window.Android.requestNativeNotificationPermission === 'function') {
-            // Panggil fungsi di Kotlin
-            window.Android.requestNativeNotificationPermission();
-        } else {
-            // Fallback
-            alert("Fitur ini hanya berfungsi di dalam aplikasi Android.");
-        }
-    }
-
-    // --- [BARU] FUNGSI UNTUK MENERIMA HASIL DARI KOTLIN ---
-    function handleLocationPermissionResult(isGranted) {
-        if (isGranted) {
-            localStorage.setItem('locationAccess', 'granted');
-            locationToggle.checked = true;
-            showPrayerCardLoading(true);
-
-            // Kode asli Anda untuk mendapatkan lokasi
-            navigator.geolocation.getCurrentPosition(
-                position => {
-                    const { latitude, longitude } = position.coords;
-                    localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
-                    fetchCityName(latitude, longitude);
-                    fetchPrayerTimes(latitude, longitude);
-                },
-                error => {
-                    // Handle error jika gagal dapat lokasi setelah diizinkan
-                    console.error("Error getting location:", error);
-                    showPrayerCardLoading(false);
-                    locationDisplay.textContent = 'Gagal dapat lokasi.';
-                }
-            );
-        } else {
-            localStorage.setItem('locationAccess', 'denied');
-            locationToggle.checked = false;
-            alert("Anda menolak izin lokasi.");
-        }
-    }
-
-    function handleNotificationPermissionResult(isGranted) {
-        if (isGranted) {
-            localStorage.setItem('notificationPermission', 'granted');
-            notificationToggle.checked = true;
-            soundToggle.disabled = false;
-            // Tampilkan notifikasi percobaan
-            new Notification('ZikirNur', { 
-                body: 'Terima kasih! Notifikasi adzan telah diaktifkan.', 
-                icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png' 
-            });
-        } else {
-            localStorage.setItem('notificationPermission', 'denied');
-            notificationToggle.checked = false;
-            soundToggle.disabled = true;
-            alert("Anda menolak izin notifikasi.");
-        }
-    }
-
-
-    // Pastikan event listener untuk tombol izin memanggil fungsi yang BARU
-    locationToggle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-             if (localStorage.getItem('locationAccess') !== 'granted') {
-                 e.preventDefault();
-                 e.target.checked = false; // Kembalikan toggle ke posisi off
-                 // Panggil fungsi BARU yang akan menampilkan dialog izin
-                 requestLocationAccess();
-             }
-        } else {
-            // ... (logika saat toggle dimatikan)
-        }
-    });
-
-    notificationToggle.addEventListener('change', (e) => {
-         if (e.target.checked) {
-             e.preventDefault();
-             e.target.checked = false;
-             // Panggil fungsi BARU
-             requestNotificationPermission();
-         } else {
-             // ... (logika saat toggle dimatikan)
-         }
-    });
-
-            function initializePermissions() {
-                if (localStorage.getItem('locationAccess') === 'granted') {
-                    locationToggle.checked = true;
-                    requestLocationAccess(); 
-                } else {
-                    locationToggle.checked = false;
-                    fetchPrayerTimes(); 
-                }
-
-                if (localStorage.getItem('notificationPermission') === 'granted' && Notification.permission === 'granted') {
-                    notificationToggle.checked = true;
-                    soundToggle.disabled = false;
-                    soundToggle.checked = (localStorage.getItem('soundPermission') === 'granted');
-                } else {
-                    notificationToggle.checked = false;
-                    soundToggle.disabled = true;
-                    soundToggle.checked = false;
-                }
-            }
-
-            async function fetchPrayerTimes(lat = null, lon = null) {
-                const ADJUSTMENT = 2;
-                let apiUrl;
-                if (lat && lon) {
-                    apiUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=11`;
-                } else {
-                    apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=Medan&country=Indonesia&method=11`;
-                }
-                try {
-                    const response = await fetch(apiUrl);
-                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
-                    const data = await response.json();
-                    if (data.code === 200) {
-                        const times = data.data.timings;
-                        function adjustTime(timeStr, minutes) {
-                            let [h, m] = timeStr.split(':').map(Number);
-                            let date = new Date();
-                            date.setHours(h, m + minutes, 0);
-                            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-                        }
-                        document.getElementById('time-Imsak').textContent = adjustTime(times.Imsak, ADJUSTMENT);
-                        document.getElementById('time-Fajr').textContent = adjustTime(times.Fajr, ADJUSTMENT);
-                        document.getElementById('time-Dhuhr').textContent = times.Dhuhr;
-                        document.getElementById('time-Asr').textContent = times.Asr;
-                        document.getElementById('time-Maghrib').textContent = times.Maghrib;
-                        document.getElementById('time-Isha').textContent = adjustTime(times.Isha, ADJUSTMENT);
-                        const hijri = data.data.date.hijri;
-                        document.getElementById('currentDateHijri').textContent = `${hijri.weekday.ar}, ${hijri.day} ${hijri.month.ar} ${hijri.year} H`;
-                        highlightNextPrayer();
-                    }
-                    
-                                // [TAMBAHAN] Simpan jadwal sholat ke variabel global
-                todayPrayerTimes = {
-                    Imsak: document.getElementById('time-Imsak').textContent,
-                    Fajr: document.getElementById('time-Fajr').textContent,
-                    Dhuhr: document.getElementById('time-Dhuhr').textContent,
-                    Asr: document.getElementById('time-Asr').textContent,
-                    Maghrib: document.getElementById('time-Maghrib').textContent,
-                    Isha: document.getElementById('time-Isha').textContent
-                };
-                    
-                } catch (error) {
-                    console.error("Gagal mengambil data waktu sholat:", error);
-                    const prayerGrid = document.getElementById('prayerTimesGrid');
-                    if (prayerGrid) { prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`; }
-                } finally {
-                    showPrayerCardLoading(false);
-                }
-            }
-            
-            
-
-            function highlightNextPrayer() {
-                const now = new Date();
-                const currentTime = now.getHours() * 60 + now.getMinutes();
-                const prayerOrder = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-                let nextPrayerFound = false;
-                document.querySelectorAll('.prayer-time-item').forEach(item => item.classList.remove('next-prayer'));
-                for (const prayer of prayerOrder) {
-                    const timeEl = document.getElementById(`time-${prayer}`);
-                    if (!timeEl) continue;
-                    const timeStr = timeEl.textContent;
-                    if (timeStr === '--:--' || timeStr === '...') continue;
-                    const [h, m] = timeStr.split(':').map(Number);
-                    const prayerTime = h * 60 + m;
-                    if (currentTime < prayerTime) {
-                        timeEl.closest('.prayer-time-item').classList.add('next-prayer');
-                        nextPrayerFound = true;
-                        break;
-                    }
-                }
-                if (!nextPrayerFound) {
-                    const fajrItem = document.getElementById('time-Fajr');
-                    if (fajrItem) fajrItem.closest('.prayer-time-item').classList.add('next-prayer');
-                }
-            }
-            
-            initializePermissions();
-            setInterval(highlightNextPrayer, 30000);
-
-            // --- Audio Player & Accordion Logic ---
-            const allAudios=document.querySelectorAll('audio');const audioContainer=document.querySelector('.featured-zikir-container');function stopAllAudios(exceptAudio){allAudios.forEach(audio=>{if(audio!==exceptAudio){audio.pause();audio.currentTime=0;}});}
-            function resetAllPlayersUI(exceptContainer){document.querySelectorAll('.audio-controls-container').forEach(container=>{if(container!==exceptContainer){container.querySelector('.play-btn').classList.remove('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.stop-btn').classList.add('hidden');}});}
-            audioContainer.addEventListener('click',(e)=>{const playBtn=e.target.closest('.play-btn');const pauseBtn=e.target.closest('.pause-btn');const stopBtn=e.target.closest('.stop-btn');if(playBtn){const targetId=playBtn.dataset.target;const audio=document.getElementById(targetId);const container=playBtn.parentElement;stopAllAudios(audio);resetAllPlayersUI(container);audio.play();playBtn.classList.add('hidden');container.querySelector('.pause-btn').classList.remove('hidden');container.querySelector('.stop-btn').classList.remove('hidden');}
-            if(pauseBtn){const targetId=pauseBtn.dataset.target;const audio=document.getElementById(targetId);const container=pauseBtn.parentElement;audio.pause();pauseBtn.classList.add('hidden');container.querySelector('.play-btn').classList.remove('hidden');}
-            if(stopBtn){const targetId=stopBtn.dataset.target;const audio=document.getElementById(targetId);const container=stopBtn.parentElement;audio.pause();audio.currentTime=0;stopBtn.classList.add('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.play-btn').classList.remove('hidden');}});allAudios.forEach(audio=>{audio.addEventListener('ended',()=>{const container=document.querySelector(`.play-btn[data-target="${audio.id}"]`).parentElement;container.querySelector('.play-btn').classList.remove('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.stop-btn').classList.add('hidden');});});
-            const dhikrContainer=document.querySelector('.dhikr-container-new');if(dhikrContainer){const slider=dhikrContainer.querySelector('.dhikr-slider-new');const slides=dhikrContainer.querySelectorAll('.dhikr-slide-new');const nextBtn=dhikrContainer.querySelector('.slider-nav-new.next');const prevBtn=dhikrContainer.querySelector('.slider-nav-new.prev');const totalSlides=slides.length;let currentIndex=0;const goToSlide=(index)=>{if(index<0)index=0;if(index>=totalSlides)index=totalSlides-1;slider.style.transform=`translateX(-${index*100}%)`;currentIndex=index;updateSlideState(currentIndex);};const updateSlideState=(index)=>{slides.forEach((slide,i)=>{if(i===index){initializeCounter(slide);}});};
-            const initializeCounter=(slide)=>{const counterBtn=slide.querySelector('.progress-counter');const countDisplay=slide.querySelector('.count-display-new');const ring=slide.querySelector('.progress-ring__circle');const progressBarFill=slide.querySelector('.progress-bar-fill');const resetBtn=slide.querySelector('.reset-btn-new');const maxCount=parseInt(counterBtn.dataset.max);let count=0;const radius=ring.r.baseVal.value;const circumference=2*Math.PI*radius;ring.style.strokeDasharray=`${circumference} ${circumference}`;const setProgress=(percent)=>{const offset=circumference-(percent/100)*circumference;ring.style.strokeDashoffset=offset;const overallProgress=(currentIndex/(totalSlides-1))*100;progressBarFill.style.width=`${overallProgress}%`;};
-            const resetCounter=()=>{count=0;countDisplay.textContent=count;setProgress(0);};resetCounter();const newCounterBtn=counterBtn.cloneNode(true);counterBtn.parentNode.replaceChild(newCounterBtn,counterBtn);const newResetBtn=resetBtn.cloneNode(true);resetBtn.parentNode.replaceChild(newResetBtn,resetBtn);newCounterBtn.addEventListener('click',()=>{count++;if(count>maxCount)count=maxCount;countDisplay.textContent=count;const progressPercent=(count/maxCount)*100;setProgress(progressPercent);if(navigator.vibrate)navigator.vibrate(50);if(count===maxCount){if(currentIndex<totalSlides-1){setTimeout(()=>goToSlide(currentIndex+1),500);}else{newCounterBtn.style.backgroundColor='var(--secondary-color)';}}});newResetBtn.addEventListener('click',resetCounter);};
-            nextBtn.addEventListener('click',()=>goToSlide(currentIndex+1));prevBtn.addEventListener('click',()=>goToSlide(currentIndex-1));goToSlide(0);const shortcutLink=document.querySelector('a[href="#dzikir-bada-sholat"]');if(shortcutLink){shortcutLink.addEventListener('click',(e)=>{e.preventDefault();const targetId='dzikir-bada-sholat-section';sections.forEach(section=>section.classList.remove('active'));const targetSection=document.getElementById(targetId);if(targetSection){targetSection.classList.add('active');goToSlide(0);}
-            window.scrollTo(0,0);});}}
-            const prayerStepHeaders=document.querySelectorAll('.step-header');prayerStepHeaders.forEach(header=>{header.addEventListener('click',()=>{const content=header.nextElementSibling;header.classList.toggle('active');if(content.style.maxHeight){content.style.maxHeight=null;}else{content.style.maxHeight=content.scrollHeight+"px";}});});
-            
-            // --- Logika untuk Arah Kiblat ---
-            function setupQiblaFeature() {
-                window.isQiblaActive = false;
-                const permissionPromptEl = document.getElementById('kiblat-permission-prompt');
-                const permissionBtn = document.getElementById('kiblat-permission-btn');
-                const compassUiContainer = document.querySelector('.compass-ui-container');
-                const compassCircleEl = document.getElementById('qibla-compass-circle');
-                const roseEl = document.getElementById('compass-rose');
-                const pointerEl = document.getElementById('qibla-pointer');
-                const degreeDisplayEl = document.querySelector('.direction-degree');
-                let orientationSensor = null;
-
-                function calculateQiblaBearing(lat, lon) {
-                    const toRad = (deg) => deg * Math.PI / 180;
-                    const kaabaLat = toRad(21.4225);
-                    const userLat = toRad(lat);
-                    const dLon = toRad(39.8262 - lon);
-                    const y = Math.sin(dLon) * Math.cos(kaabaLat);
-                    const x = Math.cos(userLat) * Math.sin(kaabaLat) - Math.sin(userLat) * Math.cos(kaabaLat) * Math.cos(dLon);
-                    return (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
-                }
-
-                function getHeadingFromQuaternion(quaternion) {
-                    const [x, y, z, w] = quaternion;
-                    let yawRad = Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
-                    return (360 - (yawRad * (180 / Math.PI))) % 360;
-                };
-
-                async function startCompass() {
-                    window.isQiblaActive = true;
-                    compassUiContainer.style.display = 'flex';
-                    permissionPromptEl.style.display = 'none';
-                    degreeDisplayEl.innerHTML = 'Mendapatkan lokasi & kalibrasi...';
-
-                    try {
-                        const position = await new Promise((resolve, reject) => {
-                            navigator.geolocation.getCurrentPosition(resolve, reject, {
-                                enableHighAccuracy: true, timeout: 15000, maximumAge: 0
-                            });
-                        });
-                        const qiblaBearing = calculateQiblaBearing(position.coords.latitude, position.coords.longitude);
-                        degreeDisplayEl.textContent = `Arah Kiblat: ${qiblaBearing.toFixed(1)}°`;
-
-                        if ('AbsoluteOrientationSensor' in window) {
-                            orientationSensor = new AbsoluteOrientationSensor({ frequency: 60 });
-                            orientationSensor.onreading = () => {
-                                if (!orientationSensor.quaternion) return;
-                                const trueHeading = getHeadingFromQuaternion(orientationSensor.quaternion);
-                                const roseRotation = -trueHeading;
-                                const pointerRotation = qiblaBearing - trueHeading;
-                                roseEl.style.transform = `rotate(${roseRotation}deg)`;
-                                pointerEl.style.transform = `rotate(${pointerRotation}deg)`;
-                                const alignmentCheck = Math.abs(pointerRotation % 360);
-                                if (alignmentCheck < 2.5 || alignmentCheck > 357.5) {
-                                    compassCircleEl.classList.add('aligned');
-                                    degreeDisplayEl.textContent = '✓ Arah Kiblat Tepat';
-                                } else {
-                                    compassCircleEl.classList.remove('aligned');
-                                    degreeDisplayEl.innerHTML = `Putar ponsel Anda hingga ikon Ka'bah 🕋 lurus ke atas.`;
-                                }
-                            };
-                            orientationSensor.onerror = (event) => { degreeDisplayEl.textContent = 'Error: Sensor tidak berfungsi.'; };
-                            orientationSensor.start();
-                        } else {
-                           degreeDisplayEl.textContent = 'Error: Sensor tidak didukung.';
-                        }
-                    } catch (error) {
-                        degreeDisplayEl.textContent = 'Gagal mendapatkan lokasi. Pastikan GPS aktif.';
-                        window.isQiblaActive = false;
-                    }
-                }
-                
-                window.stopQiblaCompass = function() {
-                    if (orientationSensor) {
-                        orientationSensor.stop();
-                        orientationSensor = null;
-                    }
-                    window.isQiblaActive = false;
-                    compassCircleEl.classList.remove('aligned');
-                }
-
-                async function requestAndStart() {
-                    try {
-                        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                            const permissionState = await DeviceOrientationEvent.requestPermission();
-                            if (permissionState !== 'granted') {
-                                alert('Izin sensor gerak diperlukan untuk fitur kompas.');
-                                return;
-                            }
-                        }
-                        startCompass();
-                    } catch(error) {
-                        alert('Gagal meminta izin sensor. Pastikan browser Anda mendukungnya.');
-                    }
-                }
-                
-                permissionBtn.addEventListener('click', requestAndStart);
-            }
-            
-            // --- Logika untuk Tasbih Digital ---
-            function setupTasbihDigital() {
-                const tasbihSetupEl = document.getElementById('tasbih-setup');
-                const tasbihCounterEl = document.getElementById('tasbih-counter');
-                const dzikirSelect = document.getElementById('dzikir-select');
-                const customDzikirInput = document.getElementById('custom-dzikir-input');
-                const dzikirTargetInput = document.getElementById('dzikir-target');
-                const startBtn = document.getElementById('start-tasbih-btn');
-                const displayDzikirText = document.getElementById('display-dzikir-text');
-                const displayDzikirTarget = document.getElementById('display-dzikir-target');
-                const countDisplay = document.getElementById('tasbih-count-display');
-                const incrementBtn = document.getElementById('increment-tasbih-btn');
-                const resetCountBtn = document.getElementById('reset-count-btn');
-                const resetSetupLink = document.getElementById('reset-setup-link');
-
-                let currentCount = 0;
-                let targetCount = 0;
-
-                dzikirSelect.addEventListener('change', () => {
-                    customDzikirInput.style.display = (dzikirSelect.value === 'custom') ? 'block' : 'none';
-                });
-
-                startBtn.addEventListener('click', () => {
-                    const selectedDzikirValue = dzikirSelect.value;
-                    let dzikirText = (selectedDzikirValue === 'custom') ? customDzikirInput.value.trim() : selectedDzikirValue;
-                    const targetValue = parseInt(dzikirTargetInput.value, 10);
-
-                    if (!dzikirText || !targetValue || targetValue <= 0) {
-                        showCustomPopup({
-                            title: 'Input Tidak Valid',
-                            message: 'Silakan pilih/isi dzikir dan masukkan jumlah target yang benar.',
-                            iconHtml: '<i class="fas fa-exclamation-triangle" style="color: #FFC107;"></i>',
-                            primaryBtnText: 'Mengerti'
-                        });
-                        return;
-                    }
-
-                    targetCount = targetValue;
-                    currentCount = 0;
-                    displayDzikirText.textContent = dzikirText;
-                    displayDzikirTarget.textContent = `${targetCount}x`;
-                    countDisplay.textContent = currentCount;
-                    tasbihSetupEl.style.display = 'none';
-                    tasbihCounterEl.style.display = 'flex';
-                });
-
-                incrementBtn.addEventListener('click', () => {
-                    if (currentCount < targetCount) {
-                        currentCount++;
-                        countDisplay.textContent = currentCount;
-                        if (navigator.vibrate) navigator.vibrate(50);
-                        
-                        if (currentCount === targetCount) {
-                             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                             showCustomPopup({
-                                 title: 'Alhamdulillah!',
-                                 message: 'Anda telah menyelesaikan target dzikir. Semoga Allah menerima amalan kita.',
-                                 iconHtml: '<i class="fas fa-check-circle" style="color: var(--secondary-color);"></i>',
-                                 primaryBtnText: 'Selesai'
-                             });
-                        }
-                    }
-                });
-
-                resetCountBtn.addEventListener('click', () => {
-                    currentCount = 0;
-                    countDisplay.textContent = currentCount;
-                });
-
-                resetSetupLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    tasbihCounterEl.style.display = 'none';
-                    tasbihSetupEl.style.display = 'flex';
-                    dzikirSelect.value = '';
-                    customDzikirInput.value = '';
-                    customDzikirInput.style.display = 'none';
-                    dzikirTargetInput.value = '';
-                    currentCount = 0;
-                    targetCount = 0;
-                });
-            }
-
-            // --- [MODIFIKASI] Logika untuk slider tombol ---
-            function setupButtonSlider() {
-                const slider = document.querySelector('.survey-slider');
-                if (!slider) return;
-
-                const slides = slider.querySelectorAll('.survey-button');
-                const slideCount = slides.length;
-                if (slideCount === 0) return;
-
-                const slideHeight = slides[0].offsetHeight;
-                let currentSlide = 0;
-
-                setInterval(() => {
-                    currentSlide = (currentSlide + 1) % slideCount;
-                    slider.style.transform = `translateY(-${currentSlide * slideHeight}px)`;
-                }, 5000); // Ganti setiap 5 detik
-            }
-
-            // Panggil semua fungsi setup
-            setupQiblaFeature();
-            setupTasbihDigital();
-            setupButtonSlider(); // <-- Panggil fungsi baru ini
-
+            document.querySelector('a[href="#pengaturan"]').classList.add('current-page');
+            window.scrollTo(0, 0);
         });
-            // [BARU] Fungsi untuk memeriksa waktu sholat dan memutar Adzan
+
+        // --- Navigation Logic ---
+        function handleNavigation(e) {
+            e.preventDefault();
+            const targetId = e.currentTarget.getAttribute('href').substring(1) + '-section';
+            
+            const correspondingSidebarLink = document.querySelector(`.sidebar-nav-list a[href="${e.currentTarget.getAttribute('href')}"]`);
+            if (correspondingSidebarLink) {
+                navLinks.forEach(l => l.classList.remove('current-page'));
+                correspondingSidebarLink.classList.add('current-page');
+            }
+
+            sections.forEach(section => section.classList.remove('active'));
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            if(window.isQiblaActive && targetId !== 'kiblat-section') {
+                const stopQiblaCompass = window.stopQiblaCompass;
+                if(typeof stopQiblaCompass === 'function') {
+                    stopQiblaCompass();
+                }
+            }
+
+            closeSidebar();
+            window.scrollTo(0, 0);
+        }
+
+        navLinks.forEach(link => { link.addEventListener('click', handleNavigation); });
+        shortcutLinks.forEach(link => { link.addEventListener('click', handleNavigation); });
+        
+        document.querySelector('.sidebar-nav-list a[href="#dashboard"]').classList.add('current-page');
+        document.getElementById('dashboard-section').classList.add('active');
+
+        // --- Dark Mode Logic ---
+        let autoModeInterval; function setMode(isDark){const moonIconBtn=document.getElementById('darkModeIcon');if(isDark){document.body.classList.add('dark-mode');moonIconBtn.classList.add('dark-mode-active');}else{document.body.classList.remove('dark-mode');moonIconBtn.classList.remove('dark-mode-active');}}
+        function checkAutoMode(){const isNight=new Date().getHours()>=18||new Date().getHours()<6;setMode(isNight);}
+        function applySavedMode(){const savedMode=localStorage.getItem('themeMode')||'auto';if(savedMode==='dark'){setMode(true);darkModeToggle.checked=true;autoModeToggle.checked=false;}else if(savedMode==='light'){setMode(false);darkModeToggle.checked=false;autoModeToggle.checked=false;}else{autoModeToggle.checked=true;darkModeToggle.disabled=true;checkAutoMode();autoModeInterval=setInterval(checkAutoMode,60000);}}
+        darkModeToggle.addEventListener('change',()=>{localStorage.setItem('themeMode',darkModeToggle.checked?'dark':'light');applySavedMode();});autoModeToggle.addEventListener('change',()=>{clearInterval(autoModeInterval);if(autoModeToggle.checked){localStorage.setItem('themeMode','auto');darkModeToggle.checked=false;darkModeToggle.disabled=true;checkAutoMode();autoModeInterval=setInterval(checkAutoMode,60000);}else{darkModeToggle.disabled=false;localStorage.setItem('themeMode','light');}
+        applySavedMode();});darkModeIcon.addEventListener('click',()=>{const isCurrentlyDark=document.body.classList.contains('dark-mode');autoModeToggle.checked=false;darkModeToggle.disabled=false;darkModeToggle.checked=!isCurrentlyDark;localStorage.setItem('themeMode',!isCurrentlyDark?'dark':'light');applySavedMode();});applySavedMode();
+
+        // --- Popup Logic ---
+        function hidePermissionPopup(){ popup.classList.remove('active'); }
+
+        function showPermissionPopup({title,message,iconHtml,onAllow,onDeny}){
+            popupTitle.textContent=title;
+            popupMessage.textContent=message;
+            popupIcon.innerHTML=iconHtml;
+            
+            popupDenyBtn.style.display = 'block';
+            popupAllowBtn.textContent = 'Izinkan';
+
+            const newAllowBtn=popupAllowBtn.cloneNode(true);
+            popupAllowBtn.parentNode.replaceChild(newAllowBtn,popupAllowBtn);
+            
+            const newDenyBtn=popupDenyBtn.cloneNode(true);
+            popupDenyBtn.parentNode.replaceChild(newDenyBtn,popupDenyBtn);
+            
+            newAllowBtn.addEventListener('click',()=>{onAllow();hidePermissionPopup();});
+            newDenyBtn.addEventListener('click',()=>{onDeny();hidePermissionPopup();});
+            
+            popup.classList.add('active');
+        }
+        
+        function showCustomPopup({title, message, iconHtml, primaryBtnText, onPrimaryClick}) {
+            popupTitle.textContent = title;
+            popupMessage.textContent = message;
+            popupIcon.innerHTML = iconHtml;
+            const denyBtn = document.getElementById('popup-deny-btn');
+            denyBtn.style.display = 'none';
+            const allowBtn = document.getElementById('popup-allow-btn');
+            allowBtn.textContent = primaryBtnText || 'OK';
+            const newAllowBtn = allowBtn.cloneNode(true);
+            allowBtn.parentNode.replaceChild(newAllowBtn, allowBtn);
+            
+            newAllowBtn.addEventListener('click', () => {
+                if(onPrimaryClick) onPrimaryClick();
+                hidePermissionPopup();
+                setTimeout(() => {
+                    denyBtn.style.display = 'block';
+                    newAllowBtn.textContent = 'Izinkan';
+                }, 300);
+            });
+
+            popup.classList.add('active');
+        }
+
+        // --- Prayer Times & Permissions Logic ---
+        
+        function showPrayerCardLoading(isLoading) {
+            if (isLoading) {
+                prayerTimeCard.classList.add('loading');
+                locationDisplay.textContent = 'Memperbarui lokasi & jadwal...';
+                document.getElementById('currentDateHijri').textContent = '';
+                document.querySelectorAll('.prayer-time-item').forEach(item => item.classList.remove('next-prayer'));
+                document.querySelectorAll('#prayerTimesGrid strong').forEach(el => {
+                    el.textContent = '...';
+                });
+            } else {
+                prayerTimeCard.classList.remove('loading');
+            }
+        }
+        
+        refreshLocationBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const icon = refreshLocationBtn.querySelector('i');
+            if (icon.classList.contains('refreshing')) return;
+            requestLocationAccess();
+        });
+
+
+        // ===================================================================
+        // == PERUBAHAN UTAMA DIMULAI DI SINI ==
+        // ===================================================================
+
+        // LANGKAH 1: Tambahkan Fungsi Callback untuk Menerima Hasil Izin dari Android
+        window.handleLocationPermissionResult = function(isGranted) {
+            if (isGranted) {
+                console.log("Izin lokasi DIBERIKAN dari Android.");
+                localStorage.setItem('locationAccess', 'granted');
+                locationToggle.checked = true;
+                showPrayerCardLoading(true);
+
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const { latitude, longitude } = position.coords;
+                        localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
+                        fetchPrayerTimes(latitude, longitude);
+                    },
+                    error => {
+                        console.error("Gagal mendapatkan lokasi setelah izin diberikan:", error);
+                        showPrayerCardLoading(false);
+                        alert('Gagal mendapatkan koordinat. Pastikan GPS Anda aktif.');
+                    }
+                );
+            } else {
+                console.log("Izin lokasi DITOLAK dari Android.");
+                localStorage.setItem('locationAccess', 'denied');
+                locationToggle.checked = false;
+                alert("Anda menolak izin lokasi. Waktu sholat akan menggunakan lokasi default.");
+                fetchPrayerTimes();
+            }
+        }
+
+        window.handleNotificationPermissionResult = function(isGranted) {
+            if (isGranted) {
+                console.log("Izin notifikasi DIBERIKAN dari Android.");
+                localStorage.setItem('notificationPermission', 'granted');
+                notificationToggle.checked = true;
+                soundToggle.disabled = false;
+                
+                try {
+                    new Notification('ZikirNur', { 
+                        body: 'Terima kasih! Notifikasi adzan telah diaktifkan.',
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png' // Contoh URL icon
+                    });
+                } catch (e) {
+                    console.error("Gagal menampilkan notifikasi tes:", e);
+                }
+
+            } else {
+                console.log("Izin notifikasi DITOLAK dari Android.");
+                localStorage.setItem('notificationPermission', 'denied');
+                notificationToggle.checked = false;
+                soundToggle.checked = false;
+                soundToggle.disabled = true;
+                alert("Anda menolak izin notifikasi.");
+            }
+        }
+
+
+        // LANGKAH 2: Modifikasi Fungsi Permintaan Izin
+        function requestLocationAccess() {
+            console.log("Meminta izin lokasi ke Android...");
+            if (window.Android && typeof window.Android.requestNativeLocationPermission === 'function') {
+                window.Android.requestNativeLocationPermission();
+            } else {
+                console.warn("Bukan di lingkungan Android. Mensimulasikan pemberian izin.");
+                handleLocationPermissionResult(confirm("Simulasi: Izinkan akses lokasi?"));
+            }
+        }
+
+        function requestNotificationPermission() {
+            console.log("Meminta izin notifikasi ke Android...");
+            if (window.Android && typeof window.Android.requestNativeNotificationPermission === 'function') {
+                window.Android.requestNativeNotificationPermission();
+            } else {
+                console.warn("Bukan di lingkungan Android. Mensimulasikan pemberian izin.");
+                handleNotificationPermissionResult(confirm("Simulasi: Izinkan notifikasi?"));
+            }
+        }
+        
+        // LANGKAH 3: Perbaiki Event Listener pada Tombol Toggle
+        locationToggle.addEventListener('change', (e) => {
+            e.preventDefault(); 
+            if (e.target.checked) {
+                e.target.checked = false; 
+                requestLocationAccess();
+            } else {
+                localStorage.setItem('locationAccess', 'denied');
+                localStorage.removeItem('userLocation');
+                e.target.checked = false;
+                locationDisplay.textContent = 'Medan, Sumatera Utara';
+                fetchPrayerTimes();
+            }
+        });
+
+        notificationToggle.addEventListener('change', (e) => {
+            e.preventDefault(); 
+            if (e.target.checked) {
+                e.target.checked = false;
+                requestNotificationPermission();
+            } else {
+                localStorage.setItem('notificationPermission', 'denied');
+                localStorage.setItem('soundPermission', 'denied');
+                e.target.checked = false;
+                soundToggle.checked = false;
+                soundToggle.disabled = true;
+            }
+        });
+        
+        soundToggle.addEventListener('change', () => {
+             localStorage.setItem('soundPermission', soundToggle.checked ? 'granted' : 'denied');
+        });
+
+        // ===================================================================
+        // == PERUBAHAN UTAMA SELESAI DI SINI ==
+        // ===================================================================
+
+
+        function initializePermissions() {
+            if (localStorage.getItem('locationAccess') === 'granted') {
+                locationToggle.checked = true;
+                const userLoc = JSON.parse(localStorage.getItem('userLocation'));
+                if (userLoc) {
+                    fetchPrayerTimes(userLoc.latitude, userLoc.longitude);
+                } else {
+                    requestLocationAccess(); // Minta ulang jika data lokasi tidak ada
+                }
+            } else {
+                locationToggle.checked = false;
+                fetchPrayerTimes(); 
+            }
+
+            if (localStorage.getItem('notificationPermission') === 'granted') {
+                notificationToggle.checked = true;
+                soundToggle.disabled = false;
+                soundToggle.checked = (localStorage.getItem('soundPermission') === 'granted');
+            } else {
+                notificationToggle.checked = false;
+                soundToggle.disabled = true;
+                soundToggle.checked = false;
+            }
+        }
+
+        async function fetchCityName(lat, lon) {
+             try {
+                // Menggunakan API gratis untuk reverse geocoding
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                const data = await response.json();
+                const city = data.address.city || data.address.state || 'Lokasi Terdeteksi';
+                locationDisplay.textContent = city;
+             } catch(error) {
+                console.error("Gagal mendapatkan nama kota:", error);
+                locationDisplay.textContent = "Lokasi Terdeteksi";
+             }
+        }
+
+        async function fetchPrayerTimes(lat = null, lon = null) {
+            const ADJUSTMENT = 2;
+            let apiUrl;
+            if (lat && lon) {
+                apiUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=11`;
+                fetchCityName(lat, lon); // Ambil nama kota jika ada lat/lon
+            } else {
+                apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=Medan&country=Indonesia&method=11`;
+                locationDisplay.textContent = "Medan, Sumatera Utara";
+            }
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const data = await response.json();
+                if (data.code === 200) {
+                    const times = data.data.timings;
+                    function adjustTime(timeStr, minutes) {
+                        let [h, m] = timeStr.split(':').map(Number);
+                        let date = new Date();
+                        date.setHours(h, m + minutes, 0);
+                        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                    }
+                    const prayerData = {
+                         Imsak: adjustTime(times.Imsak, ADJUSTMENT),
+                         Fajr: adjustTime(times.Fajr, ADJUSTMENT),
+                         Dhuhr: times.Dhuhr,
+                         Asr: times.Asr,
+                         Maghrib: times.Maghrib,
+                         Isha: adjustTime(times.Isha, ADJUSTMENT)
+                    };
+                    
+                    Object.keys(prayerData).forEach(key => {
+                        document.getElementById(`time-${key}`).textContent = prayerData[key];
+                    });
+                    
+                    todayPrayerTimes = prayerData; // Simpan jadwal
+
+                    const hijri = data.data.date.hijri;
+                    document.getElementById('currentDateHijri').textContent = `${hijri.weekday.ar}, ${hijri.day} ${hijri.month.ar} ${hijri.year} H`;
+                    highlightNextPrayer();
+                }
+            } catch (error) {
+                console.error("Gagal mengambil data waktu sholat:", error);
+                const prayerGrid = document.getElementById('prayerTimesGrid');
+                if (prayerGrid) { prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`; }
+            } finally {
+                showPrayerCardLoading(false);
+            }
+        }
+        
+        function highlightNextPrayer() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            const prayerOrder = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+            let nextPrayerFound = false;
+            document.querySelectorAll('.prayer-time-item').forEach(item => item.classList.remove('next-prayer'));
+            for (const prayer of prayerOrder) {
+                const timeEl = document.getElementById(`time-${prayer}`);
+                if (!timeEl) continue;
+                const timeStr = timeEl.textContent;
+                if (timeStr === '--:--' || timeStr === '...') continue;
+                const [h, m] = timeStr.split(':').map(Number);
+                const prayerTime = h * 60 + m;
+                if (currentTime < prayerTime) {
+                    timeEl.closest('.prayer-time-item').classList.add('next-prayer');
+                    nextPrayerFound = true;
+                    break;
+                }
+            }
+            if (!nextPrayerFound) {
+                const fajrItem = document.getElementById('time-Fajr');
+                if (fajrItem) fajrItem.closest('.prayer-time-item').classList.add('next-prayer');
+            }
+        }
+        
+        initializePermissions();
+        setInterval(highlightNextPrayer, 30000);
+
+        // --- Audio Player & Accordion Logic ---
+        const allAudios=document.querySelectorAll('audio');const audioContainer=document.querySelector('.featured-zikir-container');function stopAllAudios(exceptAudio){allAudios.forEach(audio=>{if(audio!==exceptAudio){audio.pause();audio.currentTime=0;}});}
+        function resetAllPlayersUI(exceptContainer){document.querySelectorAll('.audio-controls-container').forEach(container=>{if(container!==exceptContainer){container.querySelector('.play-btn').classList.remove('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.stop-btn').classList.add('hidden');}});}
+        audioContainer.addEventListener('click',(e)=>{const playBtn=e.target.closest('.play-btn');const pauseBtn=e.target.closest('.pause-btn');const stopBtn=e.target.closest('.stop-btn');if(playBtn){const targetId=playBtn.dataset.target;const audio=document.getElementById(targetId);const container=playBtn.parentElement;stopAllAudios(audio);resetAllPlayersUI(container);audio.play();playBtn.classList.add('hidden');container.querySelector('.pause-btn').classList.remove('hidden');container.querySelector('.stop-btn').classList.remove('hidden');}
+        if(pauseBtn){const targetId=pauseBtn.dataset.target;const audio=document.getElementById(targetId);const container=pauseBtn.parentElement;audio.pause();pauseBtn.classList.add('hidden');container.querySelector('.play-btn').classList.remove('hidden');}
+        if(stopBtn){const targetId=stopBtn.dataset.target;const audio=document.getElementById(targetId);const container=stopBtn.parentElement;audio.pause();audio.currentTime=0;stopBtn.classList.add('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.play-btn').classList.remove('hidden');}});allAudios.forEach(audio=>{audio.addEventListener('ended',()=>{const container=document.querySelector(`.play-btn[data-target="${audio.id}"]`).parentElement;container.querySelector('.play-btn').classList.remove('hidden');container.querySelector('.pause-btn').classList.add('hidden');container.querySelector('.stop-btn').classList.add('hidden');});});
+        const dhikrContainer=document.querySelector('.dhikr-container-new');if(dhikrContainer){const slider=dhikrContainer.querySelector('.dhikr-slider-new');const slides=dhikrContainer.querySelectorAll('.dhikr-slide-new');const nextBtn=dhikrContainer.querySelector('.slider-nav-new.next');const prevBtn=dhikrContainer.querySelector('.slider-nav-new.prev');const totalSlides=slides.length;let currentIndex=0;const goToSlide=(index)=>{if(index<0)index=0;if(index>=totalSlides)index=totalSlides-1;slider.style.transform=`translateX(-${index*100}%)`;currentIndex=index;updateSlideState(currentIndex);};const updateSlideState=(index)=>{slides.forEach((slide,i)=>{if(i===index){initializeCounter(slide);}});};
+        const initializeCounter=(slide)=>{const counterBtn=slide.querySelector('.progress-counter');const countDisplay=slide.querySelector('.count-display-new');const ring=slide.querySelector('.progress-ring__circle');const progressBarFill=slide.querySelector('.progress-bar-fill');const resetBtn=slide.querySelector('.reset-btn-new');const maxCount=parseInt(counterBtn.dataset.max);let count=0;const radius=ring.r.baseVal.value;const circumference=2*Math.PI*radius;ring.style.strokeDasharray=`${circumference} ${circumference}`;const setProgress=(percent)=>{const offset=circumference-(percent/100)*circumference;ring.style.strokeDashoffset=offset;const overallProgress=(currentIndex/(totalSlides-1))*100;progressBarFill.style.width=`${overallProgress}%`;};
+        const resetCounter=()=>{count=0;countDisplay.textContent=count;setProgress(0);};resetCounter();const newCounterBtn=counterBtn.cloneNode(true);counterBtn.parentNode.replaceChild(newCounterBtn,counterBtn);const newResetBtn=resetBtn.cloneNode(true);resetBtn.parentNode.replaceChild(newResetBtn,resetBtn);newCounterBtn.addEventListener('click',()=>{count++;if(count>maxCount)count=maxCount;countDisplay.textContent=count;const progressPercent=(count/maxCount)*100;setProgress(progressPercent);if(navigator.vibrate)navigator.vibrate(50);if(count===maxCount){if(currentIndex<totalSlides-1){setTimeout(()=>goToSlide(currentIndex+1),500);}else{newCounterBtn.style.backgroundColor='var(--secondary-color)';}}});newResetBtn.addEventListener('click',resetCounter);};
+        nextBtn.addEventListener('click',()=>goToSlide(currentIndex+1));prevBtn.addEventListener('click',()=>goToSlide(currentIndex-1));goToSlide(0);const shortcutLink=document.querySelector('a[href="#dzikir-bada-sholat"]');if(shortcutLink){shortcutLink.addEventListener('click',(e)=>{e.preventDefault();const targetId='dzikir-bada-sholat-section';sections.forEach(section=>section.classList.remove('active'));const targetSection=document.getElementById(targetId);if(targetSection){targetSection.classList.add('active');goToSlide(0);}
+        window.scrollTo(0,0);});}}
+        const prayerStepHeaders=document.querySelectorAll('.step-header');prayerStepHeaders.forEach(header=>{header.addEventListener('click',()=>{const content=header.nextElementSibling;header.classList.toggle('active');if(content.style.maxHeight){content.style.maxHeight=null;}else{content.style.maxHeight=content.scrollHeight+"px";}});});
+        
+        // --- Logika untuk Arah Kiblat ---
+        function setupQiblaFeature() {
+            window.isQiblaActive = false;
+            const permissionPromptEl = document.getElementById('kiblat-permission-prompt');
+            const permissionBtn = document.getElementById('kiblat-permission-btn');
+            const compassUiContainer = document.querySelector('.compass-ui-container');
+            const compassCircleEl = document.getElementById('qibla-compass-circle');
+            const roseEl = document.getElementById('compass-rose');
+            const pointerEl = document.getElementById('qibla-pointer');
+            const degreeDisplayEl = document.querySelector('.direction-degree');
+            let orientationSensor = null;
+
+            function calculateQiblaBearing(lat, lon) {
+                const toRad = (deg) => deg * Math.PI / 180;
+                const kaabaLat = toRad(21.4225);
+                const userLat = toRad(lat);
+                const dLon = toRad(39.8262 - lon);
+                const y = Math.sin(dLon) * Math.cos(kaabaLat);
+                const x = Math.cos(userLat) * Math.sin(kaabaLat) - Math.sin(userLat) * Math.cos(kaabaLat) * Math.cos(dLon);
+                return (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
+            }
+
+            function getHeadingFromQuaternion(quaternion) {
+                const [x, y, z, w] = quaternion;
+                let yawRad = Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
+                return (360 - (yawRad * (180 / Math.PI))) % 360;
+            };
+
+            async function startCompass() {
+                window.isQiblaActive = true;
+                compassUiContainer.style.display = 'flex';
+                permissionPromptEl.style.display = 'none';
+                degreeDisplayEl.innerHTML = 'Mendapatkan lokasi & kalibrasi...';
+
+                try {
+                    const position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true, timeout: 15000, maximumAge: 0
+                        });
+                    });
+                    const qiblaBearing = calculateQiblaBearing(position.coords.latitude, position.coords.longitude);
+                    degreeDisplayEl.textContent = `Arah Kiblat: ${qiblaBearing.toFixed(1)}°`;
+
+                    if ('AbsoluteOrientationSensor' in window) {
+                        orientationSensor = new AbsoluteOrientationSensor({ frequency: 60 });
+                        orientationSensor.onreading = () => {
+                            if (!orientationSensor.quaternion) return;
+                            const trueHeading = getHeadingFromQuaternion(orientationSensor.quaternion);
+                            const roseRotation = -trueHeading;
+                            const pointerRotation = qiblaBearing - trueHeading;
+                            roseEl.style.transform = `rotate(${roseRotation}deg)`;
+                            pointerEl.style.transform = `rotate(${pointerRotation}deg)`;
+                            const alignmentCheck = Math.abs(pointerRotation % 360);
+                            if (alignmentCheck < 2.5 || alignmentCheck > 357.5) {
+                                compassCircleEl.classList.add('aligned');
+                                degreeDisplayEl.textContent = '✓ Arah Kiblat Tepat';
+                            } else {
+                                compassCircleEl.classList.remove('aligned');
+                                degreeDisplayEl.innerHTML = `Putar ponsel Anda hingga ikon Ka'bah 🕋 lurus ke atas.`;
+                            }
+                        };
+                        orientationSensor.onerror = (event) => { degreeDisplayEl.textContent = 'Error: Sensor tidak berfungsi.'; };
+                        orientationSensor.start();
+                    } else {
+                       degreeDisplayEl.textContent = 'Error: Sensor tidak didukung.';
+                    }
+                } catch (error) {
+                    degreeDisplayEl.textContent = 'Gagal mendapatkan lokasi. Pastikan GPS aktif.';
+                    window.isQiblaActive = false;
+                }
+            }
+            
+            window.stopQiblaCompass = function() {
+                if (orientationSensor) {
+                    orientationSensor.stop();
+                    orientationSensor = null;
+                }
+                window.isQiblaActive = false;
+                compassCircleEl.classList.remove('aligned');
+            }
+
+            async function requestAndStart() {
+                try {
+                    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                        const permissionState = await DeviceOrientationEvent.requestPermission();
+                        if (permissionState !== 'granted') {
+                            alert('Izin sensor gerak diperlukan untuk fitur kompas.');
+                            return;
+                        }
+                    }
+                    startCompass();
+                } catch(error) {
+                    alert('Gagal meminta izin sensor. Pastikan browser Anda mendukungnya.');
+                }
+            }
+            
+            permissionBtn.addEventListener('click', requestAndStart);
+        }
+        
+        // --- Logika untuk Tasbih Digital ---
+        function setupTasbihDigital() {
+            const tasbihSetupEl = document.getElementById('tasbih-setup');
+            const tasbihCounterEl = document.getElementById('tasbih-counter');
+            const dzikirSelect = document.getElementById('dzikir-select');
+            const customDzikirInput = document.getElementById('custom-dzikir-input');
+            const dzikirTargetInput = document.getElementById('dzikir-target');
+            const startBtn = document.getElementById('start-tasbih-btn');
+            const displayDzikirText = document.getElementById('display-dzikir-text');
+            const displayDzikirTarget = document.getElementById('display-dzikir-target');
+            const countDisplay = document.getElementById('tasbih-count-display');
+            const incrementBtn = document.getElementById('increment-tasbih-btn');
+            const resetCountBtn = document.getElementById('reset-count-btn');
+            const resetSetupLink = document.getElementById('reset-setup-link');
+
+            let currentCount = 0;
+            let targetCount = 0;
+
+            dzikirSelect.addEventListener('change', () => {
+                customDzikirInput.style.display = (dzikirSelect.value === 'custom') ? 'block' : 'none';
+            });
+
+            startBtn.addEventListener('click', () => {
+                const selectedDzikirValue = dzikirSelect.value;
+                let dzikirText = (selectedDzikirValue === 'custom') ? customDzikirInput.value.trim() : selectedDzikirValue;
+                const targetValue = parseInt(dzikirTargetInput.value, 10);
+
+                if (!dzikirText || !targetValue || targetValue <= 0) {
+                    showCustomPopup({
+                        title: 'Input Tidak Valid',
+                        message: 'Silakan pilih/isi dzikir dan masukkan jumlah target yang benar.',
+                        iconHtml: '<i class="fas fa-exclamation-triangle" style="color: #FFC107;"></i>',
+                        primaryBtnText: 'Mengerti'
+                    });
+                    return;
+                }
+
+                targetCount = targetValue;
+                currentCount = 0;
+                displayDzikirText.textContent = dzikirText;
+                displayDzikirTarget.textContent = `${targetCount}x`;
+                countDisplay.textContent = currentCount;
+                tasbihSetupEl.style.display = 'none';
+                tasbihCounterEl.style.display = 'flex';
+            });
+
+            incrementBtn.addEventListener('click', () => {
+                if (currentCount < targetCount) {
+                    currentCount++;
+                    countDisplay.textContent = currentCount;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    
+                    if (currentCount === targetCount) {
+                         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                         showCustomPopup({
+                             title: 'Alhamdulillah!',
+                             message: 'Anda telah menyelesaikan target dzikir. Semoga Allah menerima amalan kita.',
+                             iconHtml: '<i class="fas fa-check-circle" style="color: var(--secondary-color);"></i>',
+                             primaryBtnText: 'Selesai'
+                         });
+                    }
+                }
+            });
+
+            resetCountBtn.addEventListener('click', () => {
+                currentCount = 0;
+                countDisplay.textContent = currentCount;
+            });
+
+            resetSetupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                tasbihCounterEl.style.display = 'none';
+                tasbihSetupEl.style.display = 'flex';
+                dzikirSelect.value = '';
+                customDzikirInput.value = '';
+                customDzikirInput.style.display = 'none';
+                dzikirTargetInput.value = '';
+                currentCount = 0;
+                targetCount = 0;
+            });
+        }
+
+        // --- [MODIFIKASI] Logika untuk slider tombol ---
+        function setupButtonSlider() {
+            const slider = document.querySelector('.survey-slider');
+            if (!slider) return;
+
+            const slides = slider.querySelectorAll('.survey-button');
+            const slideCount = slides.length;
+            if (slideCount === 0) return;
+
+            const slideHeight = slides[0].offsetHeight;
+            let currentSlide = 0;
+
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % slideCount;
+                slider.style.transform = `translateY(-${currentSlide * slideHeight}px)`;
+            }, 5000); // Ganti setiap 5 detik
+        }
+        
+        // Panggil semua fungsi setup
+        setupQiblaFeature();
+        setupTasbihDigital();
+        setupButtonSlider();
+
+    });
+    
+    // Fungsi untuk memeriksa waktu sholat dan memutar Adzan
     function checkAndPlayAdzan() {
         if (!todayPrayerTimes || Object.keys(todayPrayerTimes).length === 0) {
             return; // Belum ada jadwal sholat
@@ -2068,6 +2050,8 @@
             }
         }
     }
+    // Periksa waktu adzan setiap menit
+    setInterval(checkAndPlayAdzan, 60000);
     </script>
 </body>
 </html>
