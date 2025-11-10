@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1727,6 +1725,7 @@
     let dhikrCounts = []; // Untuk menyimpan progres dzikir
     let isQuranAutoplayActive = false;
     let currentAudioSrc = null;
+    let currentSurahNumber = null; // [BARU] Untuk melacak surah saat ini
 
     /**
      * 🔥 Fungsi Utama: Dijalankan setelah semua HTML dimuat
@@ -1780,8 +1779,10 @@
         setupQiblaFeature();
         setupTasbihDigital();
         setupButtonSlider();
-        initFirebaseMotivasi(elements); // <-- [FIX] Sekarang fungsi ini ada
-        initQuranFeature(); // <-- Ini sekarang akan berjalan
+        initFirebaseMotivasi(elements);
+        
+        // [FIX] Panggil fungsi inisialisasi Al-Qur'an DI DALAM DOMContentLoaded
+        initQuranFeature(); 
 
         // Setel interval untuk update highlight sholat
         setInterval(highlightNextPrayer, 30000);
@@ -1790,14 +1791,15 @@
     // --- Inisialisasi Modul ---
 
     /**
-     * [FIX] Fungsi yang hilang kini ditambahkan.
      * Menginisialisasi Firebase dan listener untuk Motivasi Harian.
      */
     function initFirebaseMotivasi(elements) {
         const { motivasiTextEl, motivasiTimeEl } = elements;
         if (!motivasiTextEl) return;
 
-        // 1. Konfigurasi Firebase
+        // [PERINGATAN] Kunci API Anda terekspos ke publik.
+        // AMANKAN KUNCI INI di Firebase Console dengan menambahkan "HTTP Referrers"
+        // ke 'annurislamic.github.io' dan '127.0.0.1'.
         const firebaseConfig = {
             apiKey: "AIzaSyDJ7tA4Ar0M4VaICnm6Mpm7ffkAKQrR3M8",
             authDomain: "appwebiatecth.firebaseapp.com",
@@ -1808,21 +1810,18 @@
             measurementId: "G-SVG6FJ6XKS"
         };
 
-        // 2. Inisialisasi Firebase
         try {
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
             const db = firebase.firestore();
-
-            // 3. Buat listener real-time (onSnapshot)
             const motivasiRef = db.collection('motivasi').doc('terbaru');
             
             motivasiRef.onSnapshot((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
                     if (data && data.pesan) {
-                        motivasiTextEl.textContent = data.pesan; // Aman
+                        motivasiTextEl.textContent = data.pesan; 
                         if (data.timestamp && typeof data.timestamp.toDate === 'function') {
                             const t = data.timestamp.toDate();
                             motivasiTimeEl.textContent = ` ${t.toLocaleString('id-ID', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}`;
@@ -1873,7 +1872,7 @@
                 elements.navLinks.forEach(l => l.classList.remove('current-page'));
                 document.querySelector('a[href="#pengaturan"]').classList.add('current-page');
             });
-        }
+         }
     }
 
     function initNavigation(elements) {
@@ -2208,7 +2207,7 @@
         }
     }
 
-    // --- Logika Waktu Sholat ---
+    // --- Logika Waktu Sholat (TANPA PROXY) ---
 
     function showPrayerCardLoading(isLoading) {
         const prayerTimeCard = document.querySelector('.prayer-time-card');
@@ -2232,12 +2231,14 @@
     async function fetchCityName(lat, lon) {
         const locationDisplay = document.querySelector('.card-location');
         try {
+            // [CATATAN] Ini mungkin gagal karena CORS di GitHub Pages.
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            if (!response.ok) throw new Error('Gagal fetch nama kota');
             const data = await response.json();
             const city = data.address.city || data.address.state || 'Lokasi Terdeteksi';
             if(locationDisplay) locationDisplay.textContent = city;
         } catch(error) {
-            console.error("Gagal mendapatkan nama kota:", error);
+            console.error("Gagal mendapatkan nama kota (CORS error - ini wajar tanpa proxy):", error);
             if(locationDisplay) locationDisplay.textContent = "Lokasi Terdeteksi";
         }
     }
@@ -2248,7 +2249,6 @@
         
         const locationDisplay = document.querySelector('.card-location');
 
-        // [KINERJA] Logika Caching
         const today = new Date().toLocaleDateString('id-ID');
         const locationKey = lat ? `${lat.toFixed(2)}-${lon.toFixed(2)}` : 'default-medan';
         const cacheKey = 'prayerTimesCache';
@@ -2270,11 +2270,14 @@
 
         const ADJUSTMENT = 2;
         let apiUrl;
+        
+        const adhanApiBase = 'https://api.aladhan.com/v1';
+
         if (lat && lon) {
-            apiUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=11`;
+            apiUrl = `${adhanApiBase}/timings?latitude=${lat}&longitude=${lon}&method=11`;
             fetchCityName(lat, lon);
         } else {
-            apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=Medan&country=Indonesia&method=11`;
+            apiUrl = `${adhanApiBase}/timingsByCity?city=Medan&country=Indonesia&method=11`;
             if(locationDisplay) locationDisplay.textContent = "Medan, Sumatera Utara";
         }
         
@@ -2292,7 +2295,7 @@
                 updatePrayerUI(data.data);
             }
         } catch (error) {
-            console.error("Gagal mengambil data waktu sholat:", error);
+            console.error("Gagal mengambil data waktu sholat (CORS error - ini wajar tanpa proxy):", error);
             const prayerGrid = document.getElementById('prayerTimesGrid');
             if (prayerGrid) { prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`; }
             showPrayerCardLoading(false);
@@ -2470,7 +2473,6 @@
         const totalSlides = slides.length;
         let currentIndex = 0;
         
-        // [PERBAIKAN] Inisialisasi array untuk menyimpan progres
         dhikrCounts = new Array(totalSlides).fill(0);
 
         const goToSlide = (index) => {
@@ -2498,7 +2500,6 @@
             const resetBtn = slide.querySelector('.reset-btn-new');
             const maxCount = parseInt(counterBtn.dataset.max);
             
-            // [PERBAIKAN] Ambil hitungan dari state global
             let count = dhikrCounts[index]; 
             
             const radius = ring.r.baseVal.value;
@@ -2520,7 +2521,7 @@
 
             const resetCounter = () => {
                 count = 0;
-                dhikrCounts[index] = 0; // [PERBAIKAN] Reset state global
+                dhikrCounts[index] = 0;
                 updateCounterUI();
             };
             
@@ -2535,7 +2536,7 @@
                 if (count >= maxCount) return; 
 
                 count++;
-                dhikrCounts[index] = count; // [PERBAIKAN] Simpan state
+                dhikrCounts[index] = count;
                 updateCounterUI();
                 
                 if(navigator.vibrate) navigator.vibrate(50);
@@ -2598,7 +2599,6 @@
         const compassCircleEl = document.getElementById('qibla-compass-circle');
         const roseEl = document.getElementById('compass-rose');
         const pointerEl = document.getElementById('qibla-pointer');
-        // [AKSESIBILITAS] Tambahkan aria-live
         const degreeDisplayEl = document.querySelector('.direction-degree');
         if (degreeDisplayEl) degreeDisplayEl.setAttribute('aria-live', 'polite');
 
@@ -2811,9 +2811,23 @@
         startSlider(slider, slideCount, slideHeight);
     }
 
-    // --- Logika Fitur Al-Qur'an (Modular & Aman) ---
+    // --- [VERSI BARU] Logika Fitur Al-Qur'an (Dengan Autoplay Antar-Surah) ---
     
+    // [BARU] Helper function untuk mematikan autoplay
+    function stopQuranAutoplay() {
+        isQuranAutoplayActive = false;
+        const autoplayToggleBtn = document.getElementById('quran-autoplay-toggle');
+        if (autoplayToggleBtn) {
+            autoplayToggleBtn.classList.remove('active');
+            const span = autoplayToggleBtn.querySelector('span');
+            if (span) span.textContent = 'Autoplay: Mati';
+        }
+        window.currentPlayingButton = null;
+        currentAudioSrc = null;
+    }
+
     function initQuranFeature() {
+        // --- Ambil Elemen DOM ---
         const surahListContainer = document.getElementById('surah-list-content');
         const surahListLoading = document.getElementById('surah-list-loading');
         const surahDetailContainer = document.getElementById('surah-detail-container');
@@ -2823,18 +2837,20 @@
         const surahDetailInfo = document.getElementById('surah-detail-info');
         const surahDetailLoading = document.getElementById('surah-detail-loading');
         const backToSurahListBtn = document.getElementById('back-to-surah-list-btn');
+        
         const autoplayToggleBtn = document.getElementById('quran-autoplay-toggle');
         const toggleTranslationBtn = document.getElementById('quran-toggle-translation');
         const toggleTransliterationBtn = document.getElementById('quran-toggle-transliteration');
 
         let surahListLoaded = false;
         
+        // --- Setup Tombol Kontrol ---
         if (autoplayToggleBtn) {
             autoplayToggleBtn.addEventListener('click', () => {
                 isQuranAutoplayActive = !isQuranAutoplayActive;
                 autoplayToggleBtn.classList.toggle('active', isQuranAutoplayActive);
                 const span = autoplayToggleBtn.querySelector('span');
-                span.textContent = isQuranAutoplayActive ? 'Autoplay: Aktif' : 'Autoplay: Mati';
+                if (span) span.textContent = isQuranAutoplayActive ? 'Autoplay: Aktif' : 'Autoplay: Mati';
             });
         }
         
@@ -2855,8 +2871,12 @@
             toggleTransliterationBtn.addEventListener('click', () => toggleVerseDetail(toggleTransliterationBtn, 'verse-transliteration'));
         }
 
+        // --- Setup Audio Player Global ---
         function setupGlobalAudioPlayer() {
-            if (!globalAudioPlayer) return;
+            if (!globalAudioPlayer) {
+                console.error("Audio player global tidak ditemukan!");
+                return;
+            }
             
             globalAudioPlayer.addEventListener('loadstart', () => {
                 if (window.currentPlayingButton) {
@@ -2871,6 +2891,7 @@
                 }
             });
 
+            // [MODIFIKASI] Event 'ended' diperbarui untuk autoplay antar-surah
             globalAudioPlayer.addEventListener('ended', () => {
                 if (!window.currentPlayingButton) return;
                 const currentButton = window.currentPlayingButton;
@@ -2881,19 +2902,33 @@
                     if (!currentVerseItem) return;
                     
                     let nextVerseItem = currentVerseItem.nextElementSibling;
-                    if (nextVerseItem && !nextVerseItem.querySelector('.audio-control-btn')) {
-                        nextVerseItem = nextVerseItem.nextElementSibling;
-                    }
-
+                    
                     if (nextVerseItem && nextVerseItem.classList.contains('verse-item')) {
+                        // --- Autoplay ke AYAT berikutnya ---
                         const nextPlayButton = nextVerseItem.querySelector('.audio-control-btn');
                         if (nextPlayButton && !nextPlayButton.disabled) {
                             nextPlayButton.click();
                             return; 
                         }
+                    } else {
+                        // --- [BARU] Autoplay ke SURAH berikutnya ---
+                        const nextSurahNumber = (window.currentSurahNumber || 0) + 1;
+                        
+                        if (nextSurahNumber > 114) {
+                            // Sudah di akhir (An-Nas)
+                            console.log("Selesai (Akhir Al-Qur'an). Autoplay berhenti.");
+                            stopQuranAutoplay(); // Panggil helper function
+                            return;
+                        } else {
+                            // Lanjut ke surah berikutnya
+                            console.log(`Surah ${window.currentSurahNumber} selesai. Memuat surah ${nextSurahNumber}...`);
+                            loadSurahDetail(nextSurahNumber, true); // Muat surah berikutnya & mainkan
+                            return; // Penting untuk keluar
+                        }
                     }
                 }
                 
+                // Jika autoplay mati atau terjadi error di atas
                 window.currentPlayingButton = null;
                 currentAudioSrc = null;
             });
@@ -2923,7 +2958,6 @@
                 container.querySelector('.stop-btn').classList.add('hidden');
             });
 
-
             if (window.currentPlayingButton && window.currentPlayingButton !== button) {
                 window.currentPlayingButton.classList.remove('playing');
             }
@@ -2936,7 +2970,7 @@
                 globalAudioPlayer.play();
                 if (verseItemToScroll) verseItemToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
-                globalAudioPlayer.src = audioUrl;
+                globalAudioPlayer.src = audioUrl; 
                 globalAudioPlayer.play().catch(e => console.error("Gagal memutar audio:", e));
                 currentAudioSrc = audioUrl;
                 window.currentPlayingButton = button;
@@ -2948,8 +2982,10 @@
             });
         }
 
+        // --- Logika Render (Membuat Tampilan) ---
         function renderSurahList(surahs) {
-            surahListContainer.innerHTML = '';
+            if (!surahListContainer) return;
+            surahListContainer.innerHTML = ''; 
             surahs.forEach(surah => {
                 const surahItem = document.createElement('div');
                 surahItem.className = 'surah-item';
@@ -2959,16 +2995,16 @@
                 
                 const numberDiv = document.createElement('div');
                 numberDiv.className = 'surah-number';
-                numberDiv.textContent = surah.id;
+                numberDiv.textContent = surah.nomor; 
                 
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'surah-name';
                 
                 const h4 = document.createElement('h4');
-                h4.textContent = surah.name_simple;
+                h4.textContent = surah.nama_latin; 
                 
                 const p = document.createElement('p');
-                p.textContent = `${surah.translated_name.name} (${surah.verses_count} ayat)`;
+                p.textContent = `${surah.arti} (${surah.jumlah_ayat} ayat)`; 
                 
                 nameDiv.appendChild(h4);
                 nameDiv.appendChild(p);
@@ -2977,41 +3013,43 @@
                 
                 const arabicNameDiv = document.createElement('div');
                 arabicNameDiv.className = 'surah-arabic-name';
-                arabicNameDiv.textContent = surah.name_arabic;
+                arabicNameDiv.textContent = surah.nama; 
                 
                 surahItem.appendChild(infoDiv);
                 surahItem.appendChild(arabicNameDiv);
 
                 surahItem.addEventListener('click', () => {
-                    loadSurahDetail(surah.id);
+                    loadSurahDetail(surah.nomor, false); // [MODIFIKASI] Panggil dengan playOnLoad = false
                 });
                 surahListContainer.appendChild(surahItem);
             });
             if(surahListLoading) surahListLoading.style.display = 'none';
         }
 
+        // --- Logika Fetch (Ambil Data) ---
         async function loadSurahList() {
             if (!surahListContainer) return;
             if (surahListLoaded) return;
             
-            // [KINERJA] Cek cache
-            const cachedSurahs = localStorage.getItem('allSurahsData');
+            const cachedSurahs = localStorage.getItem('allSurahsData_gading');
             if (cachedSurahs) {
-                console.log("Memuat daftar surah dari cache.");
+                console.log("Memuat daftar surah dari cache (Gading).");
                 allSurahsData = JSON.parse(cachedSurahs);
                 renderSurahList(allSurahsData);
                 surahListLoaded = true;
                 return;
             }
 
-            console.log("Mengambil daftar surah baru dari API...");
+            console.log("Mengambil daftar surah baru dari API Gading...");
+            const apiUrl = 'https://quran-api.santrikoding.com/api/surah';
+
             try {
-                const response = await fetch('https://api.quran.com/api/v4/chapters?language=id');
+                const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('Gagal memuat daftar surah');
                 const data = await response.json();
                 
-                allSurahsData = data.chapters;
-                localStorage.setItem('allSurahsData', JSON.stringify(allSurahsData));
+                allSurahsData = data; 
+                localStorage.setItem('allSurahsData_gading', JSON.stringify(allSurahsData));
                 
                 renderSurahList(allSurahsData);
                 surahListLoaded = true;
@@ -3022,12 +3060,14 @@
             }
         }
         
-        async function loadSurahDetail(surahNumber) {
+        // [MODIFIKASI] Fungsi ini diubah untuk menerima parameter `playOnLoad`
+        async function loadSurahDetail(surahNumber, playOnLoad = false) {
             if (globalAudioPlayer && !globalAudioPlayer.paused) {
                 globalAudioPlayer.pause();
             }
             window.currentPlayingButton = null;
             currentAudioSrc = null;
+            window.currentSurahNumber = surahNumber; // [BARU] Simpan nomor surah saat ini
 
             surahListWrapper.style.display = 'none';
             surahDetailContainer.style.display = 'block';
@@ -3035,87 +3075,82 @@
             surahDetailLoading.style.display = 'block';
             window.scrollTo(0, 0);
 
-            if(autoplayToggleBtn) {
+            // Setel ulang tombol-tombol
+            const autoplayToggleBtn = document.getElementById('quran-autoplay-toggle');
+            const toggleTranslationBtn = document.getElementById('quran-toggle-translation');
+            const toggleTransliterationBtn = document.getElementById('quran-toggle-transliteration');
+            
+            // [MODIFIKASI] Hanya reset autoplay jika TIDAK dalam mode playOnLoad
+            if (autoplayToggleBtn && !playOnLoad) { 
                 isQuranAutoplayActive = false;
                 autoplayToggleBtn.classList.remove('active');
-                autoplayToggleBtn.querySelector('span').textContent = 'Autoplay: Mati';
+                const span = autoplayToggleBtn.querySelector('span');
+                if (span) span.textContent = 'Autoplay: Mati';
             }
             if(toggleTranslationBtn) toggleTranslationBtn.classList.add('active');
             if(toggleTransliterationBtn) toggleTransliterationBtn.classList.remove('active');
 
-            const surahData = allSurahsData.find(s => s.id === surahNumber);
-            if (surahData) {
-                surahDetailTitle.textContent = surahData.name_simple;
-                surahDetailInfo.textContent = `${surahData.translated_name.name} • ${surahData.verses_count} Ayat`;
-            }
+            const apiUrl = `https://api.alquran.cloud/v1/surah/${surahNumber}/editions/quran-uthmani,id.indonesian,en.transliteration,ar.alafasy`;
 
             try {
-                // [FIX] Menggunakan 'uthmani' (plain text) untuk keamanan, bukan 'uthmani_tajweed' (HTML)
-                const versesPromise = fetch(`https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${surahNumber}`);
-                const translationPromise = fetch(`https://api.quran.com/api/v4/quran/translations/33?chapter_number=${surahNumber}`);
-                const audioPromise = fetch(`https://api.quran.com/api/v4/recitations/7/by_chapter/${surahNumber}?per_page=all`);
-                const transliterationPromise = fetch(`https://api.quran.com/api/v4/quran/transliterations/6?chapter_number=${surahNumber}`); 
-
-                const [versesResponse, translationResponse, audioResponse, transliterationResponse] = await Promise.all([
-                    versesPromise, translationPromise, audioPromise, transliterationPromise
-                ]);
-                
-                if (!versesResponse.ok || !translationResponse.ok || !audioResponse.ok || !transliterationResponse.ok) {
-                    throw new Error('Gagal memuat semua data surah');
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('Gagal memuat data surah dari api.alquran.cloud');
                 }
                 
-                const versesData = await versesResponse.json();
-                const translationData = await translationResponse.json();
-                const audioData = await audioResponse.json();
-                const transliterationData = await transliterationResponse.json();
-
-                const verses = versesData.verses;
-                const translations = translationData.translations;
-                const audioFiles = new Map(audioData.audio_files.map(file => [file.verse_key, file.url]));
-                const transliterations = new Map(transliterationData.transliterations.map(item => [item.verse_key, item.text]));
-                
-                surahDetailContent.innerHTML = '';
-
-                if (surahNumber !== 9 && surahNumber !== 1) {
-                    const bismillah = document.createElement('div');
-                    bismillah.className = 'verse-item';
-                    const p = document.createElement('p');
-                    p.className = 'verse-arabic';
-                    p.style.textAlign = 'center';
-                    p.style.marginBottom = '0.5rem';
-                    p.style.fontSize = '1.5rem';
-                    p.textContent = 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ';
-                    bismillah.appendChild(p);
-                    surahDetailContent.appendChild(bismillah);
+                const responseData = await response.json();
+                if (responseData.code !== 200) {
+                    throw new Error(responseData.status || 'Error dari API Al-Qur\'an');
                 }
 
-                verses.forEach((verse) => {
-                    const translation = translations.find(t => t.verse_key === verse.verse_key);
-                    const audioUrl = audioFiles.get(verse.verse_key);
-                    const transliteration = transliterations.get(verse.verse_key);
-                    
-                    // [KEAMANAN] Membuat elemen ayat satu per satu
+                const surahEditions = responseData.data; 
+                
+                const arabicData = surahEditions[0];
+                const translationData = surahEditions[1];
+                const transliterationData = surahEditions[2];
+                const audioData = surahEditions[3];
+
+                const arabicEdition = arabicData.ayahs;
+                const translationEdition = translationData.ayahs;
+                const transliterationEdition = transliterationData.ayahs;
+                const audioEdition = audioData.ayahs;
+                
+                const numberOfAyahs = arabicData.numberOfAyahs;
+                surahDetailTitle.textContent = arabicData.englishName; 
+                surahDetailInfo.textContent = `${arabicData.englishNameTranslation} • ${numberOfAyahs} Ayat`;
+
+                surahDetailContent.innerHTML = ''; // Hapus loading
+
+                for (let i = 0; i < numberOfAyahs; i++) {
+                    const verseData = {
+                        nomor: arabicEdition[i].numberInSurah,
+                        ar: arabicEdition[i].text,
+                        tr: transliterationEdition[i].text,
+                        idn: translationEdition[i].text,
+                        audio: audioEdition[i].audio 
+                    };
+
+                    // --- Kode untuk membuat elemen HTML ---
                     const verseItem = document.createElement('div');
                     verseItem.className = 'verse-item';
                     
                     const verseNumber = document.createElement('div');
                     verseNumber.className = 'verse-number';
-                    verseNumber.textContent = verse.verse_key.split(':')[1];
+                    verseNumber.textContent = verseData.nomor;
                     
                     const verseArabic = document.createElement('p');
                     verseArabic.className = 'verse-arabic';
-                    // [FIX] Mengakses 'text_uthmani' karena endpointnya 'uthmani'
-                    verseArabic.textContent = verse.text_uthmani; 
+                    verseArabic.textContent = verseData.ar;
                     
                     const verseTransliteration = document.createElement('p');
                     verseTransliteration.className = 'verse-transliteration';
                     verseTransliteration.style.display = 'none';
-                    verseTransliteration.textContent = transliteration ? transliteration.text.replace(/<[^>]*>?/gm, '') : 'Transliterasi tidak ditemukan.';
-                    
+                    verseTransliteration.textContent = verseData.tr;
+
                     const verseTranslation = document.createElement('p');
                     verseTranslation.className = 'verse-translation';
                     verseTranslation.style.display = 'block';
-                    verseTranslation.textContent = translation ? translation.text.replace(/<[^>]*>?/gm, '') : 'Terjemahan tidak ditemukan.';
+                    verseTranslation.textContent = verseData.idn;
 
                     const verseControls = document.createElement('div');
                     verseControls.className = 'verse-controls';
@@ -3140,10 +3175,11 @@
                     verseItem.appendChild(verseTranslation);
                     verseItem.appendChild(verseControls);
 
+                    const audioUrl = verseData.audio;
+
                     if (audioUrl) {
                         playButton.addEventListener('click', () => {
-                            const fullAudioUrl = `https://verses.quran.com/${audioUrl}`;
-                            playVerseAudio(playButton, fullAudioUrl);
+                            playVerseAudio(playButton, audioUrl); 
                         });
                     } else {
                         playButton.disabled = true;
@@ -3151,7 +3187,27 @@
                     }
 
                     surahDetailContent.appendChild(verseItem);
-                });
+                }
+
+                // [BARU] Logika untuk auto-play ayat pertama jika `playOnLoad` true
+                if (playOnLoad) {
+                    // Pastikan status autoplay aktif secara internal dan eksternal
+                    isQuranAutoplayActive = true; 
+                    if (autoplayToggleBtn) {
+                        autoplayToggleBtn.classList.add('active');
+                        const span = autoplayToggleBtn.querySelector('span');
+                        if (span) span.textContent = 'Autoplay: Aktif';
+                    }
+
+                    const firstVerse = surahDetailContent.querySelector('.verse-item');
+                    if (firstVerse) {
+                        const firstPlayButton = firstVerse.querySelector('.audio-control-btn');
+                        if (firstPlayButton && !firstPlayButton.disabled) {
+                            // Jeda singkat agar UI sempat "bernapas" setelah render
+                            setTimeout(() => firstPlayButton.click(), 100); 
+                        }
+                    }
+                }
                 
             } catch (error) {
                 console.error('Error memuat detail surah:', error);
@@ -3160,6 +3216,7 @@
                 surahDetailLoading.style.display = 'none';
             }
         }
+
 
         function showSurahList() {
             if (globalAudioPlayer && !globalAudioPlayer.paused) {
@@ -3170,14 +3227,9 @@
                 window.currentPlayingButton.classList.remove('playing');
                 window.currentPlayingButton.classList.remove('loading');
             }
-            window.currentPlayingButton = null;
-            currentAudioSrc = null;
+            // [MODIFIKASI] Panggil helper function untuk mematikan total autoplay
+            stopQuranAutoplay(); 
 
-            if(autoplayToggleBtn) {
-                isQuranAutoplayActive = false;
-                autoplayToggleBtn.classList.remove('active');
-                autoplayToggleBtn.querySelector('span').textContent = 'Autoplay: Mati';
-            }
             if(toggleTranslationBtn) toggleTranslationBtn.classList.add('active');
             if(toggleTransliterationBtn) toggleTransliterationBtn.classList.remove('active');
 
@@ -3190,7 +3242,7 @@
             backToSurahListBtn.addEventListener('click', showSurahList);
         }
         
-        // Panggil inisialisasi
+        // --- Panggil Inisialisasi ---
         loadSurahList();
         setupGlobalAudioPlayer();
     }
@@ -3237,4 +3289,4 @@
     setInterval(checkAndPlayAdzan, 60000);
 </script>
 </body>
-    </html>
+</html>
