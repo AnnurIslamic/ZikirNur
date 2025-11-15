@@ -1716,9 +1716,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
 <script>
     // --- Deklarasi Variabel Global ---
     let todayPrayerTimes = {};
@@ -1847,10 +1844,17 @@
                         } else if (isNewMessage) {
                             // Ini adalah update BARU (bukan muat pertama)
                             // DAN pesannya berbeda
-                            console.log("Motivasi baru terdeteksi, mengirim notifikasi.");
-                            sendMotivationNotification(data.pesan); // Panggil fungsi notif
+                            console.log("Motivasi baru terdeteksi, memanggil Bridge Android...");
+                            
+                            // [PERUBAHAN KODE] Ganti panggilannya ke Bridge Native
+                            if (window.Android && typeof window.Android.showMotivationNotification === 'function') {
+                                window.Android.showMotivationNotification("Motivasi Baru ✨", data.pesan);
+                            } else {
+                                // Fallback jika tidak di Android
+                                console.warn("Bridge Android 'showMotivationNotification' tidak ditemukan.");
+                            }
                         }
-                        // --- AKHIR LOGIKA NOTIFIKASI ---
+                        // --- AKHIR MODIFIKASI ---
 
                     } else {
                         motivasiTextEl.textContent = 'Belum ada motivasi untuk hari ini. Tetap semangat!';
@@ -2279,30 +2283,7 @@
         }
     }
 
-    // [BARU] Fungsi helper untuk mengirim notifikasi motivasi
-    function sendMotivationNotification(message) {
-        // Periksa lagi apakah izin sudah diberikan
-        if (localStorage.getItem('notificationPermission') !== 'granted') {
-            console.log("Izin notifikasi tidak ada, tidak bisa mengirim.");
-            return;
-        }
-
-        const title = "Motivasi Baru ✨";
-        const options = {
-            body: message,
-            // Menggunakan ikon yang sama dari tes notifikasi Anda
-            icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png', 
-            // 'tag' berguna agar notifikasi baru menggantikan notifikasi motivasi lama
-            tag: 'zikirnur-motivasi' 
-        };
-
-        try {
-            // Ini adalah Web Notifications API standar
-            new Notification(title, options);
-        } catch (e) {
-            console.error("Gagal menampilkan notifikasi motivasi:", e);
-        }
-    }
+    // [DIHAPUS] Fungsi 'sendMotivationNotification' yang lama sudah dihapus dari sini.
 
     function requestLocationAccess() {
         console.log("Meminta izin lokasi ke Android...");
