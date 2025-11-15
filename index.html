@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1718,6 +1716,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
 <script>
     // --- Deklarasi Variabel Global ---
     let todayPrayerTimes = {};
@@ -1728,6 +1729,7 @@
     let isQuranAutoplayActive = false;
     let currentAudioSrc = null;
     let currentSurahNumber = null; // [BARU] Untuk melacak surah saat ini
+    let isFirstMotivationLoad = true; // [BARU] Penanda untuk notifikasi
 
     /**
      * 🔥 Fungsi Utama: Dijalankan setelah semua HTML dimuat
@@ -1823,13 +1825,33 @@
                 if (doc.exists) {
                     const data = doc.data();
                     if (data && data.pesan) {
+                        
+                        // [MODIFIKASI] Periksa apakah pesannya baru
+                        const isNewMessage = motivasiTextEl.textContent !== data.pesan;
+                        
+                        // Update teks di kartu
                         motivasiTextEl.textContent = data.pesan; 
+                        
                         if (data.timestamp && typeof data.timestamp.toDate === 'function') {
                             const t = data.timestamp.toDate();
                             motivasiTimeEl.textContent = ` ${t.toLocaleString('id-ID', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}`;
                         } else {
                             motivasiTimeEl.textContent = '';
                         }
+
+                        // --- [MODIFIKASI] LOGIKA NOTIFIKASI ---
+                        if (isFirstMotivationLoad) {
+                            // Muat pertama kali, jangan kirim notif
+                            isFirstMotivationLoad = false;
+                            console.log("Motivasi awal dimuat, notifikasi ditahan.");
+                        } else if (isNewMessage) {
+                            // Ini adalah update BARU (bukan muat pertama)
+                            // DAN pesannya berbeda
+                            console.log("Motivasi baru terdeteksi, mengirim notifikasi.");
+                            sendMotivationNotification(data.pesan); // Panggil fungsi notif
+                        }
+                        // --- AKHIR LOGIKA NOTIFIKASI ---
+
                     } else {
                         motivasiTextEl.textContent = 'Belum ada motivasi untuk hari ini. Tetap semangat!';
                         motivasiTimeEl.textContent = '';
@@ -1864,16 +1886,16 @@
     
     function initInfoToSettings(elements) {
          if(elements.infoToSettingsBtn) {
-            elements.infoToSettingsBtn.addEventListener('click', () => {
-                const navEvent = { 
-                    currentTarget: document.querySelector('a[href="#pengaturan"]'), 
-                    preventDefault: () => {} 
-                };
-                handleNavigation(navEvent);
-                
-                elements.navLinks.forEach(l => l.classList.remove('current-page'));
-                document.querySelector('a[href="#pengaturan"]').classList.add('current-page');
-            });
+             elements.infoToSettingsBtn.addEventListener('click', () => {
+                 const navEvent = { 
+                     currentTarget: document.querySelector('a[href="#pengaturan"]'), 
+                     preventDefault: () => {} 
+                 };
+                 handleNavigation(navEvent);
+                 
+                 elements.navLinks.forEach(l => l.classList.remove('current-page'));
+                 document.querySelector('a[href="#pengaturan"]').classList.add('current-page');
+             });
          }
     }
 
@@ -2048,145 +2070,145 @@
         }
     }
 
-function initAppSettingsAndData(elements) {
-        const { locationToggle, notificationToggle, soundToggle, refreshLocationBtn, locationDisplay } = elements;
+    function initAppSettingsAndData(elements) {
+        const { locationToggle, notificationToggle, soundToggle, refreshLocationBtn, locationDisplay } = elements;
 
-        // --- Event Listener (ini tidak berubah) ---
-        if(refreshLocationBtn) {
-            refreshLocationBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const icon = refreshLocationBtn.querySelector('i');
-                if (icon && icon.classList.contains('refreshing')) return;
-                localStorage.removeItem('prayerTimesCache');
-                requestLocationAccess();
-            });
-        }
-        if(locationToggle) {
-            locationToggle.addEventListener('change', (e) => {
-                e.preventDefault(); 
-                if (e.target.checked) {
-                    e.target.checked = false; 
-                    requestLocationAccess();
-                } else {
-                    localStorage.setItem('locationAccess', 'denied');
-                    localStorage.removeItem('userLocation');
-                    localStorage.removeItem('prayerTimesCache');
-                    e.target.checked = false;
-                    if(locationDisplay) locationDisplay.textContent = 'Medan, Sumatera Utara';
-                    fetchPrayerTimes();
-                }
-            });
-        }
-        if(notificationToggle) {
-            notificationToggle.addEventListener('change', (e) => {
-                e.preventDefault(); 
-                if (e.target.checked) {
-                    e.target.checked = false;
-                    requestNotificationPermission();
-                } else {
-                    localStorage.setItem('notificationPermission', 'denied');
-                    localStorage.setItem('soundPermission', 'denied');
-                    e.target.checked = false;
-                    if(soundToggle) {
-                        soundToggle.checked = false;
-                        soundToggle.disabled = true;
-                    }
-                }
-            });
-        }
-        if(soundToggle) {
-            soundToggle.addEventListener('change', () => {
-                localStorage.setItem('soundPermission', soundToggle.checked ? 'granted' : 'denied');
-            });
-        }
-        // --- Akhir Event Listener ---
+        // --- Event Listener (ini tidak berubah) ---
+        if(refreshLocationBtn) {
+            refreshLocationBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const icon = refreshLocationBtn.querySelector('i');
+                if (icon && icon.classList.contains('refreshing')) return;
+                localStorage.removeItem('prayerTimesCache');
+                requestLocationAccess();
+            });
+        }
+        if(locationToggle) {
+            locationToggle.addEventListener('change', (e) => {
+                e.preventDefault(); 
+                if (e.target.checked) {
+                    e.target.checked = false; 
+                    requestLocationAccess();
+                } else {
+                    localStorage.setItem('locationAccess', 'denied');
+                    localStorage.removeItem('userLocation');
+                    localStorage.removeItem('prayerTimesCache');
+                    e.target.checked = false;
+                    if(locationDisplay) locationDisplay.textContent = 'Medan, Sumatera Utara';
+                    fetchPrayerTimes();
+                }
+            });
+        }
+        if(notificationToggle) {
+            notificationToggle.addEventListener('change', (e) => {
+                e.preventDefault(); 
+                if (e.target.checked) {
+                    e.target.checked = false;
+                    requestNotificationPermission();
+                } else {
+                    localStorage.setItem('notificationPermission', 'denied');
+                    localStorage.setItem('soundPermission', 'denied');
+                    e.target.checked = false;
+                    if(soundToggle) {
+                        soundToggle.checked = false;
+                        soundToggle.disabled = true;
+                    }
+                }
+            });
+        }
+        if(soundToggle) {
+            soundToggle.addEventListener('change', () => {
+                localStorage.setItem('soundPermission', soundToggle.checked ? 'granted' : 'denied');
+            });
+        }
+        // --- Akhir Event Listener ---
 
-        /**
-         * Langkah 2: Fungsi ini akan menangani Izin Notifikasi.
-         */
-        function checkAndRequestNotificationPermission() {
-            const notificationPermission = localStorage.getItem('notificationPermission');
-            
-            if (notificationPermission === 'granted') {
-                if(notificationToggle) notificationToggle.checked = true;
-                if(soundToggle) soundToggle.disabled = false;
-                if(soundToggle) soundToggle.checked = (localStorage.getItem('soundPermission') === 'granted');
-            } else if (notificationPermission === 'denied') {
-                if(notificationToggle) notificationToggle.checked = false;
-                if(soundToggle) soundToggle.disabled = true;
-                if(soundToggle) soundToggle.checked = false;
-            } else {
-                // Izin notif belum ditanya ('null')
-                if(notificationToggle) notificationToggle.checked = false;
-                if(soundToggle) soundToggle.disabled = true;
-                if(soundToggle) soundToggle.checked = false;
-                
-                // Tunda 500ms agar transisi pop-up mulus
-                setTimeout(() => {
-                    window.showPermissionPopup({
-                        title: 'Izin Notifikasi',
-                        message: 'Aktifkan notifikasi untuk pengingat Adzan. Anda bisa mematikannya kapan saja di pengaturan.',
-                        iconHtml: '<i class="fas fa-bell"></i>',
-                        onAllow: () => {
-                            requestNotificationPermission();
-                        },
-                        onDeny: () => {
-                            localStorage.setItem('notificationPermission', 'denied');
-                            if(notificationToggle) notificationToggle.checked = false;
-                        }
-                     });
-                }, 500); 
-            }
-        }
+        /**
+         * Langkah 2: Fungsi ini akan menangani Izin Notifikasi.
+         */
+        function checkAndRequestNotificationPermission() {
+            const notificationPermission = localStorage.getItem('notificationPermission');
+            
+            if (notificationPermission === 'granted') {
+                if(notificationToggle) notificationToggle.checked = true;
+                if(soundToggle) soundToggle.disabled = false;
+                if(soundToggle) soundToggle.checked = (localStorage.getItem('soundPermission') === 'granted');
+            } else if (notificationPermission === 'denied') {
+                if(notificationToggle) notificationToggle.checked = false;
+                if(soundToggle) soundToggle.disabled = true;
+                if(soundToggle) soundToggle.checked = false;
+            } else {
+                // Izin notif belum ditanya ('null')
+                if(notificationToggle) notificationToggle.checked = false;
+                if(soundToggle) soundToggle.disabled = true;
+                if(soundToggle) soundToggle.checked = false;
+                
+                // Tunda 500ms agar transisi pop-up mulus
+                setTimeout(() => {
+                    window.showPermissionPopup({
+                        title: 'Izin Notifikasi',
+                        message: 'Aktifkan notifikasi untuk pengingat Adzan. Anda bisa mematikannya kapan saja di pengaturan.',
+                        iconHtml: '<i class="fas fa-bell"></i>',
+                        onAllow: () => {
+                            requestNotificationPermission();
+                        },
+                        onDeny: () => {
+                            localStorage.setItem('notificationPermission', 'denied');
+                            if(notificationToggle) notificationToggle.checked = false;
+                        }
+                       });
+                }, 500); 
+            }
+        }
 
-        /**
-         * Langkah 1: Logika ini dijalankan pertama kali.
-         */
-        const locationPermission = localStorage.getItem('locationAccess');
-        
-        if (locationPermission === 'granted') {
-            if(locationToggle) locationToggle.checked = true;
-            const userLoc = JSON.parse(localStorage.getItem('userLocation'));
-            if (userLoc) {
-                fetchPrayerTimes(userLoc.latitude, userLoc.longitude);
-            } else {
-                requestLocationAccess();
-            }
-            checkAndRequestNotificationPermission();
+        /**
+         * Langkah 1: Logika ini dijalankan pertama kali.
+         */
+        const locationPermission = localStorage.getItem('locationAccess');
+        
+        if (locationPermission === 'granted') {
+            if(locationToggle) locationToggle.checked = true;
+            const userLoc = JSON.parse(localStorage.getItem('userLocation'));
+            if (userLoc) {
+                fetchPrayerTimes(userLoc.latitude, userLoc.longitude);
+            } else {
+                requestLocationAccess();
+            }
+            checkAndRequestNotificationPermission();
 
-        } else if (locationPermission === 'denied') {
-            if(locationToggle) locationToggle.checked = false;
-            fetchPrayerTimes(); // Muat "Medan"
-            checkAndRequestNotificationPermission();
+        } else if (locationPermission === 'denied') {
+            if(locationToggle) locationToggle.checked = false;
+            fetchPrayerTimes(); // Muat "Medan"
+            checkAndRequestNotificationPermission();
 
-        } else {
-            // [PERUBAHAN] Izin 'null' (pengguna baru)
-            if(locationToggle) locationToggle.checked = false;
-            
-            // [PERUBAHAN] Jangan muat jadwal "Medan" dulu.
-            // Tampilkan status loading sebagai gantinya.
-            showPrayerCardLoading(true); 
-            if(locationDisplay) locationDisplay.textContent = 'Membutuhkan Izin Lokasi...';
+        } else {
+            // [PERUBAHAN] Izin 'null' (pengguna baru)
+            if(locationToggle) locationToggle.checked = false;
+            
+            // [PERUBAHAN] Jangan muat jadwal "Medan" dulu.
+            // Tampilkan status loading sebagai gantinya.
+            showPrayerCardLoading(true); 
+            if(locationDisplay) locationDisplay.textContent = 'Membutuhkan Izin Lokasi...';
 
-            // Tampilkan pop-up kustom Anda untuk bertanya
-            window.showPermissionPopup({
-                title: 'Izin Lokasi',
-                message: 'ZikirNur memerlukan izin lokasi Anda untuk menampilkan waktu sholat & arah kiblat yang akurat.',
-                iconHtml: '<i class="fas fa-map-marker-alt"></i>',
-                onAllow: () => {
-                    requestLocationAccess(); 
-                    checkAndRequestNotificationPermission();
-                },
-                onDeny: () => {
-                    localStorage.setItem('locationAccess', 'denied');
-                    if(locationToggle) locationToggle.checked = false;
-                    // [PERUBAHAN] Sekarang baru muat jadwal "Medan"
-                    fetchPrayerTimes(); 
-                    checkAndRequestNotificationPermission();
-                }
-            });
-        }
-    }
+            // Tampilkan pop-up kustom Anda untuk bertanya
+            window.showPermissionPopup({
+                title: 'Izin Lokasi',
+                message: 'ZikirNur memerlukan izin lokasi Anda untuk menampilkan waktu sholat & arah kiblat yang akurat.',
+                iconHtml: '<i class="fas fa-map-marker-alt"></i>',
+                onAllow: () => {
+                    requestLocationAccess(); 
+                    checkAndRequestNotificationPermission();
+                },
+                onDeny: () => {
+                    localStorage.setItem('locationAccess', 'denied');
+                    if(locationToggle) locationToggle.checked = false;
+                    // [PERUBAHAN] Sekarang baru muat jadwal "Medan"
+                    fetchPrayerTimes(); 
+                    checkAndRequestNotificationPermission();
+                }
+            });
+        }
+    }
 
     // --- Logika Bridge & Permission ---
 
@@ -2199,10 +2221,10 @@ function initAppSettingsAndData(elements) {
             showPrayerCardLoading(true);
 
             const geoOptions = {
-                enableHighAccuracy: false, // <-- Tidak memaksa GPS (lebih cepat)
-                timeout: 10000,            // <-- Batas waktu 10 detik
-                maximumAge: 300000          // <-- Boleh pakai lokasi cache 5 menit terakhir
-            };
+                enableHighAccuracy: false, // <-- Tidak memaksa GPS (lebih cepat)
+                timeout: 10000,            // <-- Batas waktu 10 detik
+                maximumAge: 300000         // <-- Boleh pakai lokasi cache 5 menit terakhir
+            };
 
             navigator.geolocation.getCurrentPosition(
                 position => {
@@ -2254,6 +2276,31 @@ function initAppSettingsAndData(elements) {
                 soundToggle.disabled = true;
             }
             alert("Anda menolak izin notifikasi.");
+        }
+    }
+
+    // [BARU] Fungsi helper untuk mengirim notifikasi motivasi
+    function sendMotivationNotification(message) {
+        // Periksa lagi apakah izin sudah diberikan
+        if (localStorage.getItem('notificationPermission') !== 'granted') {
+            console.log("Izin notifikasi tidak ada, tidak bisa mengirim.");
+            return;
+        }
+
+        const title = "Motivasi Baru ✨";
+        const options = {
+            body: message,
+            // Menggunakan ikon yang sama dari tes notifikasi Anda
+            icon: 'https://cdn-icons-png.flaticon.com/512/3090/3090147.png', 
+            // 'tag' berguna agar notifikasi baru menggantikan notifikasi motivasi lama
+            tag: 'zikirnur-motivasi' 
+        };
+
+        try {
+            // Ini adalah Web Notifications API standar
+            new Notification(title, options);
+        } catch (e) {
+            console.error("Gagal menampilkan notifikasi motivasi:", e);
         }
     }
 
@@ -3359,4 +3406,4 @@ function initAppSettingsAndData(elements) {
     setInterval(checkAndPlayAdzan, 60000);
 </script>
 </body>
-                                                                          </html>
+</html>
