@@ -1725,8 +1725,8 @@
     let dhikrCounts = []; // Untuk menyimpan progres dzikir
     let isQuranAutoplayActive = false;
     let currentAudioSrc = null;
-    let currentSurahNumber = null; // [BARU] Untuk melacak surah saat ini
-    let isFirstMotivationLoad = true; // [BARU] Penanda untuk notifikasi
+    let currentSurahNumber = null;
+    let isFirstMotivationLoad = true; 
 
     /**
      * 🔥 Fungsi Utama: Dijalankan setelah semua HTML dimuat
@@ -1773,7 +1773,7 @@
         initInfoToSettings(elements);
         initDarkMode(elements);
         initPopupLogic(elements);
-        initAppSettingsAndData(elements);
+        initAppSettingsAndData(elements); // <-- Fungsi yang dimodifikasi
         initDashboardAudio(elements);
         initDhikrSlider();
         initAccordions();
@@ -1782,7 +1782,6 @@
         setupButtonSlider();
         initFirebaseMotivasi(elements);
         
-        // [FIX] Panggil fungsi inisialisasi Al-Qur'an DI DALAM DOMContentLoaded
         initQuranFeature(); 
 
         // Setel interval untuk update highlight sholat
@@ -1791,16 +1790,10 @@
 
     // --- Inisialisasi Modul ---
 
-    /**
-     * Menginisialisasi Firebase dan listener untuk Motivasi Harian.
-     */
     function initFirebaseMotivasi(elements) {
         const { motivasiTextEl, motivasiTimeEl } = elements;
         if (!motivasiTextEl) return;
 
-        // [PERINGATAN] Kunci API Anda terekspos ke publik.
-        // AMANKAN KUNCI INI di Firebase Console dengan menambahkan "HTTP Referrers"
-        // ke 'annurislamic.github.io' dan '127.0.0.1'.
         const firebaseConfig = {
             apiKey: "AIzaSyDJ7tA4Ar0M4VaICnm6Mpm7ffkAKQrR3M8",
             authDomain: "appwebiatecth.firebaseapp.com",
@@ -1823,10 +1816,7 @@
                     const data = doc.data();
                     if (data && data.pesan) {
                         
-                        // [MODIFIKASI] Periksa apakah pesannya baru
                         const isNewMessage = motivasiTextEl.textContent !== data.pesan;
-                        
-                        // Update teks di kartu
                         motivasiTextEl.textContent = data.pesan; 
                         
                         if (data.timestamp && typeof data.timestamp.toDate === 'function') {
@@ -1836,25 +1826,18 @@
                             motivasiTimeEl.textContent = '';
                         }
 
-                        // --- [MODIFIKASI] LOGIKA NOTIFIKASI ---
                         if (isFirstMotivationLoad) {
-                            // Muat pertama kali, jangan kirim notif
                             isFirstMotivationLoad = false;
                             console.log("Motivasi awal dimuat, notifikasi ditahan.");
                         } else if (isNewMessage) {
-                            // Ini adalah update BARU (bukan muat pertama)
-                            // DAN pesannya berbeda
                             console.log("Motivasi baru terdeteksi, memanggil Bridge Android...");
                             
-                            // [PERUBAHAN KODE] Ganti panggilannya ke Bridge Native
                             if (window.Android && typeof window.Android.showMotivationNotification === 'function') {
                                 window.Android.showMotivationNotification("Motivasi Baru ✨", data.pesan);
                             } else {
-                                // Fallback jika tidak di Android
                                 console.warn("Bridge Android 'showMotivationNotification' tidak ditemukan.");
                             }
                         }
-                        // --- AKHIR MODIFIKASI ---
 
                     } else {
                         motivasiTextEl.textContent = 'Belum ada motivasi untuk hari ini. Tetap semangat!';
@@ -1874,7 +1857,6 @@
             if (motivasiTextEl) motivasiTextEl.textContent = 'Fitur motivasi gagal dimuat.';
         }
     }
-
 
     function initSidebar(elements) {
         const { openSidebarBtn, sidebar, sidebarOverlay } = elements;
@@ -2074,6 +2056,7 @@
         }
     }
 
+    // [MODIFIKASI UTAMA 1]
     function initAppSettingsAndData(elements) {
         const { locationToggle, notificationToggle, soundToggle, refreshLocationBtn, locationDisplay } = elements;
 
@@ -2128,7 +2111,8 @@
         // --- Akhir Event Listener ---
 
         /**
-         * Langkah 2: Fungsi ini akan menangani Izin Notifikasi.
+         * Fungsi ini (checkAndRequestNotificationPermission) TIDAK diubah.
+         * Isinya sudah benar, yang salah adalah KAPAN dia dipanggil.
          */
         function checkAndRequestNotificationPermission() {
             const notificationPermission = localStorage.getItem('notificationPermission');
@@ -2154,7 +2138,7 @@
                         message: 'Aktifkan notifikasi untuk pengingat Adzan. Anda bisa mematikannya kapan saja di pengaturan.',
                         iconHtml: '<i class="fas fa-bell"></i>',
                         onAllow: () => {
-                            requestNotificationPermission();
+                            requestNotificationPermission(); // Panggil dialog sistem notifikasi
                         },
                         onDeny: () => {
                             localStorage.setItem('notificationPermission', 'denied');
@@ -2166,48 +2150,51 @@
         }
 
         /**
-         * Langkah 1: Logika ini dijalankan pertama kali.
+         * [MODIFIKASI] Di sini letak perubahannya
          */
         const locationPermission = localStorage.getItem('locationAccess');
         
         if (locationPermission === 'granted') {
+            // Pengguna lama yang sudah izinkan lokasi
             if(locationToggle) locationToggle.checked = true;
             const userLoc = JSON.parse(localStorage.getItem('userLocation'));
             if (userLoc) {
                 fetchPrayerTimes(userLoc.latitude, userLoc.longitude);
             } else {
-                requestLocationAccess();
+                requestLocationAccess(); // Minta ulang jika datanya hilang
             }
+            // Alur lokasi selesai, SEKARANG baru cek notifikasi
             checkAndRequestNotificationPermission();
 
         } else if (locationPermission === 'denied') {
+            // Pengguna lama yang menolak lokasi
             if(locationToggle) locationToggle.checked = false;
             fetchPrayerTimes(); // Muat "Medan"
+            // Alur lokasi selesai, SEKARANG baru cek notifikasi
             checkAndRequestNotificationPermission();
 
         } else {
-            // [PERUBAHAN] Izin 'null' (pengguna baru)
+            // Pengguna BARU (izin lokasi masih 'null')
             if(locationToggle) locationToggle.checked = false;
-            
-            // [PERUBAHAN] Jangan muat jadwal "Medan" dulu.
-            // Tampilkan status loading sebagai gantinya.
             showPrayerCardLoading(true); 
             if(locationDisplay) locationDisplay.textContent = 'Membutuhkan Izin Lokasi...';
 
-            // Tampilkan pop-up kustom Anda untuk bertanya
+            // 1. Tampilkan pop-up custom untuk LOKASI
             window.showPermissionPopup({
                 title: 'Izin Lokasi',
                 message: 'ZikirNur memerlukan izin lokasi Anda untuk menampilkan waktu sholat & arah kiblat yang akurat.',
                 iconHtml: '<i class="fas fa-map-marker-alt"></i>',
                 onAllow: () => {
+                    // 2. Panggil dialog SISTEM untuk LOKASI
                     requestLocationAccess(); 
-                    checkAndRequestNotificationPermission();
+                    // JANGAN panggil cek notifikasi di sini. Panggil di callback-nya.
                 },
                 onDeny: () => {
                     localStorage.setItem('locationAccess', 'denied');
                     if(locationToggle) locationToggle.checked = false;
-                    // [PERUBAHAN] Sekarang baru muat jadwal "Medan"
-                    fetchPrayerTimes(); 
+                    fetchPrayerTimes(); // Muat "Medan"
+                    
+                    // 2b. Alur lokasi selesai (ditolak), SEKARANG baru tanya notifikasi.
                     checkAndRequestNotificationPermission();
                 }
             });
@@ -2216,6 +2203,7 @@
 
     // --- Logika Bridge & Permission ---
 
+    // [MODIFIKASI UTAMA 2]
     window.handleLocationPermissionResult = function(isGranted) {
         const locationToggle = document.getElementById('location-access-toggle');
         if (isGranted) {
@@ -2225,9 +2213,9 @@
             showPrayerCardLoading(true);
 
             const geoOptions = {
-                enableHighAccuracy: false, // <-- Tidak memaksa GPS (lebih cepat)
-                timeout: 10000,            // <-- Batas waktu 10 detik
-                maximumAge: 300000         // <-- Boleh pakai lokasi cache 5 menit terakhir
+                enableHighAccuracy: false, 
+                timeout: 10000,
+                maximumAge: 300000 
             };
 
             navigator.geolocation.getCurrentPosition(
@@ -2236,11 +2224,17 @@
                     localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
                     localStorage.removeItem('prayerTimesCache');
                     fetchPrayerTimes(latitude, longitude);
+
+                    // [BARU] Panggil cek notifikasi SETELAH lokasi sukses didapat
+                    checkAndRequestNotificationPermission();
                 },
                 error => {
                     console.error("Gagal mendapatkan lokasi setelah izin diberikan:", error);
                     showPrayerCardLoading(false);
                     alert('Gagal mendapatkan koordinat. Pastikan GPS Anda aktif.');
+
+                    // [BARU] Panggil cek notifikasi WALAUPUN lokasi gagal
+                    checkAndRequestNotificationPermission();
                 },
                 geoOptions
             );
@@ -2250,6 +2244,9 @@
             if(locationToggle) locationToggle.checked = false;
             alert("Anda menolak izin lokasi. Waktu sholat akan menggunakan lokasi default.");
             fetchPrayerTimes();
+
+            // [BARU] Panggil cek notifikasi SETELAH lokasi ditolak
+            checkAndRequestNotificationPermission();
         }
     }
 
@@ -2283,7 +2280,8 @@
         }
     }
 
-    // [DIHAPUS] Fungsi 'sendMotivationNotification' yang lama sudah dihapus dari sini.
+    // Fungsi ini tidak diperlukan lagi karena sudah diganti dengan Bridge Native
+    // function sendMotivationNotification(message) { ... }
 
     function requestLocationAccess() {
         console.log("Meminta izin lokasi ke Android...");
@@ -2329,7 +2327,6 @@
     async function fetchCityName(lat, lon) {
         const locationDisplay = document.querySelector('.card-location');
         try {
-            // [CATATAN] Ini mungkin gagal karena CORS di GitHub Pages.
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
             if (!response.ok) throw new Error('Gagal fetch nama kota');
             const data = await response.json();
@@ -2911,7 +2908,6 @@
 
     // --- [VERSI BARU] Logika Fitur Al-Qur'an (Dengan Autoplay Antar-Surah) ---
     
-    // [BARU] Helper function untuk mematikan autoplay
     function stopQuranAutoplay() {
         isQuranAutoplayActive = false;
         const autoplayToggleBtn = document.getElementById('quran-autoplay-toggle');
@@ -2989,7 +2985,6 @@
                 }
             });
 
-            // [MODIFIKASI] Event 'ended' diperbarui untuk autoplay antar-surah
             globalAudioPlayer.addEventListener('ended', () => {
                 if (!window.currentPlayingButton) return;
                 const currentButton = window.currentPlayingButton;
@@ -3002,31 +2997,26 @@
                     let nextVerseItem = currentVerseItem.nextElementSibling;
                     
                     if (nextVerseItem && nextVerseItem.classList.contains('verse-item')) {
-                        // --- Autoplay ke AYAT berikutnya ---
                         const nextPlayButton = nextVerseItem.querySelector('.audio-control-btn');
                         if (nextPlayButton && !nextPlayButton.disabled) {
                             nextPlayButton.click();
                             return; 
                         }
                     } else {
-                        // --- [BARU] Autoplay ke SURAH berikutnya ---
                         const nextSurahNumber = (window.currentSurahNumber || 0) + 1;
                         
                         if (nextSurahNumber > 114) {
-                            // Sudah di akhir (An-Nas)
                             console.log("Selesai (Akhir Al-Qur'an). Autoplay berhenti.");
-                            stopQuranAutoplay(); // Panggil helper function
+                            stopQuranAutoplay(); 
                             return;
                         } else {
-                            // Lanjut ke surah berikutnya
                             console.log(`Surah ${window.currentSurahNumber} selesai. Memuat surah ${nextSurahNumber}...`);
-                            loadSurahDetail(nextSurahNumber, true); // Muat surah berikutnya & mainkan
-                            return; // Penting untuk keluar
+                            loadSurahDetail(nextSurahNumber, true); 
+                            return; 
                         }
                     }
                 }
                 
-                // Jika autoplay mati atau terjadi error di atas
                 window.currentPlayingButton = null;
                 currentAudioSrc = null;
             });
@@ -3045,7 +3035,6 @@
         }
         
         function playVerseAudio(button, audioUrl) {
-            // Hentikan audio dashboard
             document.querySelectorAll('audio#audio-pagi, audio#audio-petang').forEach(audio => {
                 audio.pause();
                 audio.currentTime = 0;
@@ -3117,7 +3106,7 @@
                 surahItem.appendChild(arabicNameDiv);
 
                 surahItem.addEventListener('click', () => {
-                    loadSurahDetail(surah.nomor, false); // [MODIFIKASI] Panggil dengan playOnLoad = false
+                    loadSurahDetail(surah.nomor, false); 
                 });
                 surahListContainer.appendChild(surahItem);
             });
@@ -3158,14 +3147,13 @@
             }
         }
         
-        // [MODIFIKASI] Fungsi ini diubah untuk menerima parameter `playOnLoad`
         async function loadSurahDetail(surahNumber, playOnLoad = false) {
             if (globalAudioPlayer && !globalAudioPlayer.paused) {
                 globalAudioPlayer.pause();
             }
             window.currentPlayingButton = null;
             currentAudioSrc = null;
-            window.currentSurahNumber = surahNumber; // [BARU] Simpan nomor surah saat ini
+            window.currentSurahNumber = surahNumber; 
 
             surahListWrapper.style.display = 'none';
             surahDetailContainer.style.display = 'block';
@@ -3173,12 +3161,10 @@
             surahDetailLoading.style.display = 'block';
             window.scrollTo(0, 0);
 
-            // Setel ulang tombol-tombol
             const autoplayToggleBtn = document.getElementById('quran-autoplay-toggle');
             const toggleTranslationBtn = document.getElementById('quran-toggle-translation');
             const toggleTransliterationBtn = document.getElementById('quran-toggle-transliteration');
             
-            // [MODIFIKASI] Hanya reset autoplay jika TIDAK dalam mode playOnLoad
             if (autoplayToggleBtn && !playOnLoad) { 
                 isQuranAutoplayActive = false;
                 autoplayToggleBtn.classList.remove('active');
@@ -3228,7 +3214,6 @@
                         audio: audioEdition[i].audio 
                     };
 
-                    // --- Kode untuk membuat elemen HTML ---
                     const verseItem = document.createElement('div');
                     verseItem.className = 'verse-item';
                     
@@ -3287,9 +3272,7 @@
                     surahDetailContent.appendChild(verseItem);
                 }
 
-                // [BARU] Logika untuk auto-play ayat pertama jika `playOnLoad` true
                 if (playOnLoad) {
-                    // Pastikan status autoplay aktif secara internal dan eksternal
                     isQuranAutoplayActive = true; 
                     if (autoplayToggleBtn) {
                         autoplayToggleBtn.classList.add('active');
@@ -3301,7 +3284,6 @@
                     if (firstVerse) {
                         const firstPlayButton = firstVerse.querySelector('.audio-control-btn');
                         if (firstPlayButton && !firstPlayButton.disabled) {
-                            // Jeda singkat agar UI sempat "bernapas" setelah render
                             setTimeout(() => firstPlayButton.click(), 100); 
                         }
                     }
@@ -3325,7 +3307,6 @@
                 window.currentPlayingButton.classList.remove('playing');
                 window.currentPlayingButton.classList.remove('loading');
             }
-            // [MODIFIKASI] Panggil helper function untuk mematikan total autoplay
             stopQuranAutoplay(); 
 
             if(toggleTranslationBtn) toggleTranslationBtn.classList.add('active');
