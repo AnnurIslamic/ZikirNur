@@ -1726,7 +1726,7 @@
     let isQuranAutoplayActive = false;
     let currentAudioSrc = null;
     let currentSurahNumber = null;
-    let isFirstMotivationLoad = true; 
+    // let isFirstMotivationLoad = true; // <-- Sudah tidak diperlukan lagi oleh fungsi baru
 
     /**
      * 🔥 Fungsi Utama: Dijalankan setelah semua HTML dimuat
@@ -1780,7 +1780,7 @@
         setupQiblaFeature();
         setupTasbihDigital();
         setupButtonSlider();
-        initFirebaseMotivasi(elements);
+        initFirebaseMotivasi(elements); // <-- INI SEKARANG AKAN MEMANGGIL FUNGSI BARU
         
         initQuranFeature(); 
 
@@ -1790,73 +1790,40 @@
 
     // --- Inisialisasi Modul ---
 
+    /**
+     * [MODIFIKASI TOTAL]
+     * Fungsi ini tidak lagi mendengarkan Firebase.
+     * Fungsi ini hanya meminta data yang sudah disimpan oleh Kotlin.
+     */
     function initFirebaseMotivasi(elements) {
         const { motivasiTextEl, motivasiTimeEl } = elements;
         if (!motivasiTextEl) return;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDJ7tA4Ar0M4VaICnm6Mpm7ffkAKQrR3M8",
-            authDomain: "appwebiatecth.firebaseapp.com",
-            projectId: "appwebiatecth",
-            storageBucket: "appwebiatecth.firebasestorage.app",
-            messagingSenderId: "902735429660",
-            appId: "1:902735429660:web:1b9cfbfd61877ea6561fd9",
-            measurementId: "G-SVG6FJ6XKS"
-        };
+        console.log("Meminta motivasi yang tersimpan dari Android Bridge...");
 
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+        // Sembunyikan timestamp, karena kita tidak tahu kapan data ini diambil
+        if(motivasiTimeEl) motivasiTimeEl.style.display = 'none';
+
+        if (window.Android && typeof window.Android.getSavedMotivation === 'function') {
+            try {
+                // Panggil fungsi Kotlin yang kita buat
+                const savedMotivation = window.Android.getSavedMotivation();
+                
+                // Tampilkan teks yang diberikan oleh Kotlin
+                motivasiTextEl.textContent = savedMotivation;
+                console.log("Motivasi dari 'brankas' dimuat:", savedMotivation);
+
+            } catch (e) {
+                console.error("Gagal memanggil getSavedMotivation:", e);
+                motivasiTextEl.textContent = 'Gagal memuat motivasi. Coba muat ulang.';
             }
-            const db = firebase.firestore();
-            const motivasiRef = db.collection('motivasi').doc('terbaru');
-            
-            motivasiRef.onSnapshot((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data && data.pesan) {
-                        
-                        const isNewMessage = motivasiTextEl.textContent !== data.pesan;
-                        motivasiTextEl.textContent = data.pesan; 
-                        
-                        if (data.timestamp && typeof data.timestamp.toDate === 'function') {
-                            const t = data.timestamp.toDate();
-                            motivasiTimeEl.textContent = ` ${t.toLocaleString('id-ID', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}`;
-                        } else {
-                            motivasiTimeEl.textContent = '';
-                        }
-
-                        if (isFirstMotivationLoad) {
-                            isFirstMotivationLoad = false;
-                            console.log("Motivasi awal dimuat, notifikasi ditahan.");
-                        } else if (isNewMessage) {
-                            console.log("Motivasi baru terdeteksi, memanggil Bridge Android...");
-                            
-                            if (window.Android && typeof window.Android.showMotivationNotification === 'function') {
-                                window.Android.showMotivationNotification("Motivasi Baru ✨", data.pesan);
-                            } else {
-                                console.warn("Bridge Android 'showMotivationNotification' tidak ditemukan.");
-                            }
-                        }
-
-                    } else {
-                        motivasiTextEl.textContent = 'Belum ada motivasi untuk hari ini. Tetap semangat!';
-                        motivasiTimeEl.textContent = '';
-                    }
-                } else {
-                    motivasiTextEl.textContent = 'Belum ada motivasi untuk hari ini. Tetap semangat!';
-                    motivasiTimeEl.textContent = '';
-                }
-            }, (error) => {
-                console.error("Error mendengarkan update motivasi: ", error);
-                motivasiTextEl.textContent = 'Gagal memuat motivasi.';
-            });
-
-        } catch (e) {
-            console.error("Gagal inisialisasi Firebase: ", e);
-            if (motivasiTextEl) motivasiTextEl.textContent = 'Fitur motivasi gagal dimuat.';
+        } else {
+            // Fallback jika tidak di Android
+            console.warn("Bridge Android 'getSavedMotivation' tidak ditemukan.");
+            motivasiTextEl.textContent = 'Fitur motivasi hanya tersedia di aplikasi Android.';
         }
     }
+
 
     function initSidebar(elements) {
         const { openSidebarBtn, sidebar, sidebarOverlay } = elements;
@@ -2056,7 +2023,6 @@
         }
     }
 
-    // [MODIFIKASI UTAMA 1]
     function initAppSettingsAndData(elements) {
         const { locationToggle, notificationToggle, soundToggle, refreshLocationBtn, locationDisplay } = elements;
 
@@ -2112,7 +2078,6 @@
 
         /**
          * Fungsi ini (checkAndRequestNotificationPermission) TIDAK diubah.
-         * Isinya sudah benar, yang salah adalah KAPAN dia dipanggil.
          */
         function checkAndRequestNotificationPermission() {
             const notificationPermission = localStorage.getItem('notificationPermission');
@@ -2155,19 +2120,17 @@
         const locationPermission = localStorage.getItem('locationAccess');
         
         if (locationPermission === 'granted') {
-            // Pengguna lama yang sudah izinkan lokasi
             if(locationToggle) locationToggle.checked = true;
             const userLoc = JSON.parse(localStorage.getItem('userLocation'));
             if (userLoc) {
                 fetchPrayerTimes(userLoc.latitude, userLoc.longitude);
             } else {
-                requestLocationAccess(); // Minta ulang jika datanya hilang
+                requestLocationAccess(); 
             }
             // Alur lokasi selesai, SEKARANG baru cek notifikasi
             checkAndRequestNotificationPermission();
 
         } else if (locationPermission === 'denied') {
-            // Pengguna lama yang menolak lokasi
             if(locationToggle) locationToggle.checked = false;
             fetchPrayerTimes(); // Muat "Medan"
             // Alur lokasi selesai, SEKARANG baru cek notifikasi
@@ -2187,7 +2150,6 @@
                 onAllow: () => {
                     // 2. Panggil dialog SISTEM untuk LOKASI
                     requestLocationAccess(); 
-                    // JANGAN panggil cek notifikasi di sini. Panggil di callback-nya.
                 },
                 onDeny: () => {
                     localStorage.setItem('locationAccess', 'denied');
@@ -2203,7 +2165,6 @@
 
     // --- Logika Bridge & Permission ---
 
-    // [MODIFIKASI UTAMA 2]
     window.handleLocationPermissionResult = function(isGranted) {
         const locationToggle = document.getElementById('location-access-toggle');
         if (isGranted) {
@@ -2279,9 +2240,6 @@
             alert("Anda menolak izin notifikasi.");
         }
     }
-
-    // Fungsi ini tidak diperlukan lagi karena sudah diganti dengan Bridge Native
-    // function sendMotivationNotification(message) { ... }
 
     function requestLocationAccess() {
         console.log("Meminta izin lokasi ke Android...");
@@ -2545,12 +2503,12 @@
             });
             
             allAudios.forEach(audio => {
-                audio.addEventListener('ended', () => {
+                audio.addEventListener ('ended', () => {
                     const container = document.querySelector(`.play-btn[data-target="${audio.id}"]`).parentElement;
                     container.querySelector('.play-btn').classList.remove('hidden');
                     container.querySelector('.pause-btn').classList.add('hidden');
                     container.querySelector('.stop-btn').classList.add('hidden');
-                });
+                    nbsp;   });
             });
         }
     }
