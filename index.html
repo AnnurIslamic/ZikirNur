@@ -10,7 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-
+body {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 dan IE 11 */
+    user-select: none; /* Standard syntax */
+}
         
         /* --- Global Reset & Box Sizing --- */
         *,
@@ -1719,6 +1723,41 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <script>
+
+    // 1. Mematikan Klik Kanan
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        // Opsi: Tampilkan alert jika mau
+        // alert("Klik kanan dimatikan untuk melindungi konten."); 
+    });
+
+    // 2. Mematikan Tombol Keyboard (Ctrl+C, Ctrl+U, Ctrl+S, F12, dll)
+    document.onkeydown = function(e) {
+        if (event.keyCode == 123) { // F12
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { // Ctrl+Shift+I
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { // Ctrl+Shift+C
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { // Ctrl+Shift+J
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { // Ctrl+U
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) { // Ctrl+S
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode == 'C'.charCodeAt(0)) { // Ctrl+C
+            return false;
+        }
+    };
+
+
+
     // --- Deklarasi Variabel Global ---
     let todayPrayerTimes = {};
     let globalAudioPlayer;
@@ -3316,4 +3355,4 @@ if (manualRefreshBtn) {
     }, 3600000);
 </script>
 </body>
-</html>
+                                        </html>
