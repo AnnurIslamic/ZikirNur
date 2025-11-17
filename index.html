@@ -1716,6 +1716,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
 <script>
     // --- Deklarasi Variabel Global ---
     let todayPrayerTimes = {};
@@ -1726,7 +1729,6 @@
     let isQuranAutoplayActive = false;
     let currentAudioSrc = null;
     let currentSurahNumber = null;
-    // let isFirstMotivationLoad = true; // <-- Sudah tidak diperlukan lagi oleh fungsi baru
 
     /**
      * 🔥 Fungsi Utama: Dijalankan setelah semua HTML dimuat
@@ -1773,14 +1775,14 @@
         initInfoToSettings(elements);
         initDarkMode(elements);
         initPopupLogic(elements);
-        initAppSettingsAndData(elements); // <-- Fungsi yang dimodifikasi
+        initAppSettingsAndData(elements);
         initDashboardAudio(elements);
         initDhikrSlider();
         initAccordions();
         setupQiblaFeature();
         setupTasbihDigital();
         setupButtonSlider();
-        initFirebaseMotivasi(elements); // <-- INI SEKARANG AKAN MEMANGGIL FUNGSI BARU
+        initFirebaseMotivasi(elements);
         
         initQuranFeature(); 
 
@@ -1790,11 +1792,6 @@
 
     // --- Inisialisasi Modul ---
 
-    /**
-     * [MODIFIKASI TOTAL]
-     * Fungsi ini tidak lagi mendengarkan Firebase.
-     * Fungsi ini hanya meminta data yang sudah disimpan oleh Kotlin.
-     */
     function initFirebaseMotivasi(elements) {
         const { motivasiTextEl, motivasiTimeEl } = elements;
         if (!motivasiTextEl) return;
@@ -2026,7 +2023,7 @@
     function initAppSettingsAndData(elements) {
         const { locationToggle, notificationToggle, soundToggle, refreshLocationBtn, locationDisplay } = elements;
 
-        // --- Event Listener (ini tidak berubah) ---
+        // --- Event Listener ---
         if(refreshLocationBtn) {
             refreshLocationBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -2074,11 +2071,7 @@
                 localStorage.setItem('soundPermission', soundToggle.checked ? 'granted' : 'denied');
             });
         }
-        // --- Akhir Event Listener ---
-
-        /**
-         * Fungsi ini (checkAndRequestNotificationPermission) TIDAK diubah.
-         */
+        
         function checkAndRequestNotificationPermission() {
             const notificationPermission = localStorage.getItem('notificationPermission');
             
@@ -2096,14 +2089,13 @@
                 if(soundToggle) soundToggle.disabled = true;
                 if(soundToggle) soundToggle.checked = false;
                 
-                // Tunda 500ms agar transisi pop-up mulus
                 setTimeout(() => {
                     window.showPermissionPopup({
                         title: 'Izin Notifikasi',
                         message: 'Aktifkan notifikasi untuk pengingat Adzan. Anda bisa mematikannya kapan saja di pengaturan.',
                         iconHtml: '<i class="fas fa-bell"></i>',
                         onAllow: () => {
-                            requestNotificationPermission(); // Panggil dialog sistem notifikasi
+                            requestNotificationPermission(); 
                         },
                         onDeny: () => {
                             localStorage.setItem('notificationPermission', 'denied');
@@ -2114,9 +2106,6 @@
             }
         }
 
-        /**
-         * [MODIFIKASI] Di sini letak perubahannya
-         */
         const locationPermission = localStorage.getItem('locationAccess');
         
         if (locationPermission === 'granted') {
@@ -2127,36 +2116,29 @@
             } else {
                 requestLocationAccess(); 
             }
-            // Alur lokasi selesai, SEKARANG baru cek notifikasi
             checkAndRequestNotificationPermission();
 
         } else if (locationPermission === 'denied') {
             if(locationToggle) locationToggle.checked = false;
             fetchPrayerTimes(); // Muat "Medan"
-            // Alur lokasi selesai, SEKARANG baru cek notifikasi
             checkAndRequestNotificationPermission();
 
         } else {
-            // Pengguna BARU (izin lokasi masih 'null')
             if(locationToggle) locationToggle.checked = false;
             showPrayerCardLoading(true); 
             if(locationDisplay) locationDisplay.textContent = 'Membutuhkan Izin Lokasi...';
 
-            // 1. Tampilkan pop-up custom untuk LOKASI
             window.showPermissionPopup({
                 title: 'Izin Lokasi',
                 message: 'ZikirNur memerlukan izin lokasi Anda untuk menampilkan waktu sholat & arah kiblat yang akurat.',
                 iconHtml: '<i class="fas fa-map-marker-alt"></i>',
                 onAllow: () => {
-                    // 2. Panggil dialog SISTEM untuk LOKASI
                     requestLocationAccess(); 
                 },
                 onDeny: () => {
                     localStorage.setItem('locationAccess', 'denied');
                     if(locationToggle) locationToggle.checked = false;
                     fetchPrayerTimes(); // Muat "Medan"
-                    
-                    // 2b. Alur lokasi selesai (ditolak), SEKARANG baru tanya notifikasi.
                     checkAndRequestNotificationPermission();
                 }
             });
@@ -2185,16 +2167,12 @@
                     localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
                     localStorage.removeItem('prayerTimesCache');
                     fetchPrayerTimes(latitude, longitude);
-
-                    // [BARU] Panggil cek notifikasi SETELAH lokasi sukses didapat
                     checkAndRequestNotificationPermission();
                 },
                 error => {
                     console.error("Gagal mendapatkan lokasi setelah izin diberikan:", error);
                     showPrayerCardLoading(false);
                     alert('Gagal mendapatkan koordinat. Pastikan GPS Anda aktif.');
-
-                    // [BARU] Panggil cek notifikasi WALAUPUN lokasi gagal
                     checkAndRequestNotificationPermission();
                 },
                 geoOptions
@@ -2205,8 +2183,6 @@
             if(locationToggle) locationToggle.checked = false;
             alert("Anda menolak izin lokasi. Waktu sholat akan menggunakan lokasi default.");
             fetchPrayerTimes();
-
-            // [BARU] Panggil cek notifikasi SETELAH lokasi ditolak
             checkAndRequestNotificationPermission();
         }
     }
@@ -2388,6 +2364,18 @@
         
         highlightNextPrayer();
         showPrayerCardLoading(false);
+
+        // [BARU] KIRIM JADWAL KE ANDROID AGAR DI-ALARM-KAN
+        if (window.Android && typeof window.Android.schedulePrayerAlarm === 'function') {
+            // Kirim satu per satu
+            window.Android.schedulePrayerAlarm("Imsak", prayerData.Imsak);
+            window.Android.schedulePrayerAlarm("Subuh", prayerData.Fajr);
+            window.Android.schedulePrayerAlarm("Dzuhur", prayerData.Dhuhr);
+            window.Android.schedulePrayerAlarm("Ashar", prayerData.Asr);
+            window.Android.schedulePrayerAlarm("Maghrib", prayerData.Maghrib);
+            window.Android.schedulePrayerAlarm("Isya", prayerData.Isha);
+            console.log("Jadwal sholat dikirim ke Alarm Android");
+        }
     }
         
     function highlightNextPrayer() {
@@ -2508,7 +2496,7 @@
                     container.querySelector('.play-btn').classList.remove('hidden');
                     container.querySelector('.pause-btn').classList.add('hidden');
                     container.querySelector('.stop-btn').classList.add('hidden');
-                    nbsp;   });
+                   });
             });
         }
     }
@@ -3287,43 +3275,24 @@
 
     /**
      * Fungsi di luar DOMContentLoaded untuk Adzan
+     * [DIPERBARUI] Menjadwalkan Alarm Android
      */
     function checkAndPlayAdzan() {
-        if (!todayPrayerTimes || Object.keys(todayPrayerTimes).length === 0) {
-            return;
-        }
-
-        const now = new Date();
-        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        // Biarkan kosong atau hapus logika interval lama.
+        // Karena sekarang kita menggunakan AlarmManager Android,
+        // kita tidak perlu mengecek setiap menit di JavaScript.
         
-        const notifAllowed = localStorage.getItem('notificationPermission') === 'granted';
-        if (!notifAllowed) return;
-
-        const soundAllowed = localStorage.getItem('soundPermission') === 'granted';
-        if (!soundAllowed) return;
-
-        for (const prayerName in todayPrayerTimes) {
-            if (todayPrayerTimes[prayerName] === currentTime) {
-                let soundType = '';
-                if (prayerName === 'Imsak') {
-                    soundType = 'imsak';
-                } else if (prayerName === 'Fajr') {
-                    soundType = 'subuh';
-                } else if (['Dhuhr', 'Asr', 'Maghrib', 'Isha'].includes(prayerName)) {
-                    soundType = 'adzan';
-                }
-
-                if (soundType && window.Android && typeof window.Android.playAdzan === 'function') {
-                    window.Android.playAdzan(soundType);
-                    console.log(`Waktu ${prayerName} telah masuk. Memainkan suara: ${soundType}`);
-                    break;
-                }
-            }
-        }
+        // Namun, kita tetap bisa membiarkan ini untuk update UI jika perlu.
+        // Tapi fungsi utamanya sudah digantikan oleh schedulePrayerAlarm di updatePrayerUI.
     }
     
-    // Periksa waktu adzan setiap menit
-    setInterval(checkAndPlayAdzan, 60000);
+    // Kita tidak perlu interval ini lagi untuk memutar suara,
+    // tapi mungkin berguna untuk me-refresh tampilan waktu sholat (jika hari berganti).
+    // Jadi biarkan saja atau ubah intervalnya menjadi lebih lama (misal 1 jam).
+    setInterval(() => {
+       // Cek apakah hari sudah berganti, jika ya, fetch ulang jadwal
+       // Tapi untuk sekarang, biarkan saja.
+    }, 3600000);
 </script>
 </body>
 </html>
