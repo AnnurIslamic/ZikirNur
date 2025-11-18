@@ -2360,36 +2360,51 @@ body {
         }
     }
 
-    async function fetchPrayerTimes(lat = null, lon = null) {
+async function fetchPrayerTimes(lat = null, lon = null) {
         const prayerTimeCard = document.querySelector('.prayer-time-card');
         if (!prayerTimeCard) return;
         
         const locationDisplay = document.querySelector('.card-location');
-
-        const today = new Date().toLocaleDateString('id-ID');
-        const locationKey = lat ? `${lat.toFixed(2)}-${lon.toFixed(2)}` : 'default-medan';
-        const cacheKey = 'prayerTimesCache';
-        const cachedData = JSON.parse(localStorage.getItem(cacheKey));
-
-        if (cachedData && cachedData.date === today && cachedData.locationKey === locationKey) {
-            console.log("Memuat jadwal sholat dari cache.");
-            if (lat && lon) {
-                fetchCityName(lat, lon);
-            } else {
-                if(locationDisplay) locationDisplay.textContent = "Medan, Sumatera Utara";
-            }
-            updatePrayerUI(cachedData.data);
-            return;
-        }
+        const todayDate = new Date().toLocaleDateString('en-GB'); // Format DD/MM/YYYY
         
-        console.log("Mengambil jadwal sholat baru dari API...");
-        showPrayerCardLoading(true);
+        // --- [BARU: LOGIKA SATPAM] ---
+        // 1. Tanya Android: "Apakah Satpam sudah punya jadwal terbaru?"
+        if (window.Android && typeof window.Android.getOfflineJadwal === 'function') {
+            const androidData = window.Android.getOfflineJadwal();
+            
+            // Jika Satpam punya data
+            if (androidData) {
+                try {
+                    const parsed = JSON.parse(androidData);
+                    
+                    console.log("✅ Memakai Data dari Satpam Android (Instan & Offline)");
+                    
+                    // Update nama kota jika ada koordinat
+                    if (lat && lon) fetchCityName(lat, lon);
+                    else if(locationDisplay) locationDisplay.textContent = "Lokasi Tersimpan";
 
-        const ADJUSTMENT = 2;
+                    // Tampilkan jadwal langsung tanpa loading
+                    updatePrayerUI(parsed.data);
+                    
+                    // STOP DI SINI. Tidak perlu buang kuota internet lagi.
+                    return; 
+                } catch (e) {
+                    console.error("Data Satpam rusak, mencoba fetch manual...");
+                }
+            }
+        }
+
+        // 2. [FALLBACK] Jika Satpam belum punya data (misal baru install), baru kita download sendiri
+        showPrayerCardLoading(true);
+        
+        // [PENTING] Simpan lokasi ke Android agar Satpam tau harus patroli di daerah mana besok
+        if (lat && lon && window.Android && typeof window.Android.saveUserLocation === 'function') {
+            window.Android.saveUserLocation(lat.toString(), lon.toString());
+        }
+
+        const adhanApiBase = 'https://api.aladhan.com/v1';
         let apiUrl;
         
-        const adhanApiBase = 'https://api.aladhan.com/v1';
-
         if (lat && lon) {
             apiUrl = `${adhanApiBase}/timings?latitude=${lat}&longitude=${lon}&method=11`;
             fetchCityName(lat, lon);
@@ -2397,24 +2412,20 @@ body {
             apiUrl = `${adhanApiBase}/timingsByCity?city=Medan&country=Indonesia&method=11`;
             if(locationDisplay) locationDisplay.textContent = "Medan, Sumatera Utara";
         }
-        
+
         try {
             const response = await fetch(apiUrl);
-            if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+            if (!response.ok) throw new Error('HTTP error');
             const data = await response.json();
             
             if (data.code === 200) {
-                localStorage.setItem(cacheKey, JSON.stringify({
-                    date: today,
-                    locationKey: locationKey,
-                    data: data.data
-                }));
+                // Update Tampilan
                 updatePrayerUI(data.data);
             }
         } catch (error) {
-            console.error("Gagal mengambil data waktu sholat (CORS error - ini wajar tanpa proxy):", error);
+            console.error("Gagal fetch manual:", error);
             const prayerGrid = document.getElementById('prayerTimesGrid');
-            if (prayerGrid) { prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat.</p>`; }
+            if (prayerGrid) prayerGrid.innerHTML = `<p style="color: white; grid-column: 1 / -1; text-align: center;">Gagal memuat waktu sholat (Offline).</p>`;
             showPrayerCardLoading(false);
         }
     }
