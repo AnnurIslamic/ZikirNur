@@ -3462,6 +3462,15 @@ if (manualRefreshBtn) {
        // Cek apakah hari sudah berganti, jika ya, fetch ulang jadwal
        // Tapi untuk sekarang, biarkan saja.
     }, 3600000);
+    
+    // --- DAFTARKAN SERVICE WORKER (OFFLINE MODE) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker terdaftar!', reg))
+                .catch(err => console.log('Gagal daftar SW:', err));
+        });
+    }
 </script>
 </body>
-</html>
+                                </html>
