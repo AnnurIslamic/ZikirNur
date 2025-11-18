@@ -1838,9 +1838,37 @@ body {
         }
     };
 
+    // =====================================================================
+    // [BARU] LOGIKA SCROLL & AUDIO LANJUTAN (WEBVIEW OPTIMIZED)
+    // =====================================================================
+    
+    // --- 1. FUNGSI SCROLL MANUAL (Bypass scrollIntoView WebView Bug) ---
+    function scrollToActiveVerse(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
 
-    // --- [BARU] CALLBACK DARI ANDROID SERVICE ---
-    // Fungsi ini akan dipanggil oleh AndroidService ketika ayat selesai diputar
+        // Hapus highlight lama (jika ada CSS .active-highlight)
+        const oldActive = document.querySelector('.active-highlight');
+        if (oldActive) oldActive.classList.remove('active-highlight');
+
+        // Tambah highlight baru
+        element.classList.add('active-highlight');
+
+        // HITUNG POSISI TENGAH SECARA MANUAL
+        // Ini lebih kuat daripada scrollIntoView di WebView Android
+        setTimeout(() => {
+            const elementRect = element.getBoundingClientRect();
+            const absoluteElementTop = elementRect.top + window.pageYOffset;
+            const middle = absoluteElementTop - (window.innerHeight / 2) + (elementRect.height / 2);
+
+            window.scrollTo({
+                top: middle,
+                behavior: 'smooth' 
+            });
+        }, 100); // Delay mikro agar UI siap
+    }
+
+    // --- 2. CALLBACK DARI ANDROID (SINYAL AUDIO SELESAI) ---
     window.onAudioFinished = function() {
         console.log("Audio selesai dari Android Service");
         
@@ -1855,15 +1883,27 @@ body {
             const currentVerseItem = window.currentPlayingButton.closest('.verse-item');
             if (currentVerseItem) {
                 let nextVerseItem = currentVerseItem.nextElementSibling;
+                
+                // KASUS A: LANJUT AYAT DI SURAT SAMA
                 if (nextVerseItem && nextVerseItem.classList.contains('verse-item')) {
                     const nextPlayButton = nextVerseItem.querySelector('.audio-control-btn');
                     if (nextPlayButton) {
-                        // Klik otomatis tombol berikutnya
-                        nextPlayButton.click(); 
+                        nextPlayButton.click(); // Klik otomatis
                     }
-                } else {
-                    // Opsi: Lanjut ke surat berikutnya jika mau
-                     console.log("Akhir surat tercapai.");
+                } 
+                // KASUS B: GANTI SURAT (NEXT SURAH)
+                else {
+                    const nextSurahNum = (parseInt(currentSurahNumber) || 0) + 1;
+                    if (nextSurahNum <= 114) {
+                         // Tampilkan Loading
+                         if(window.Android && window.Android.showToast) window.Android.showToast("Memutar Surat Selanjutnya...");
+                         
+                         // Panggil fungsi load surah baru dengan Autoplay = TRUE
+                         loadSurahDetail(nextSurahNum, true); 
+                    } else {
+                        console.log("Khatam Al-Qur'an.");
+                        stopQuranAutoplay();
+                    }
                 }
             }
         }
@@ -3151,7 +3191,7 @@ if (manualRefreshBtn) {
         }
         
         // --- [DIPERBARUI] LOGIKA PEMUTAR AUDIO UTAMA (BRIDGE SUPPORT) ---
-        function playVerseAudio(button, audioUrl, verseNumber) { 
+        function playVerseAudio(button, audioUrl, verseNumber, verseId) { 
             // 1. Matikan Audio Dashboard (Pagi/Petang) jika sedang jalan
             document.querySelectorAll('audio#audio-pagi, audio#audio-petang').forEach(audio => {
                 audio.pause();
@@ -3166,7 +3206,11 @@ if (manualRefreshBtn) {
                 window.currentPlayingButton.classList.remove('loading');
             }
 
-            // 3. Cek apakah Android Bridge tersedia?
+            // 3. SCROLL OTOMATIS (PENTING)
+            // Panggil fungsi scroll manual yang kita buat di atas
+            scrollToActiveVerse(verseId);
+
+            // 4. Cek apakah Android Bridge tersedia?
             if (window.Android && typeof window.Android.playAudio === 'function') {
                  // --- JALUR ANDROID SERVICE (NATIVE) ---
                  
@@ -3190,13 +3234,11 @@ if (manualRefreshBtn) {
                     globalAudioPlayer.pause();
                 } else if (window.currentPlayingButton === button && globalAudioPlayer.paused) {
                     globalAudioPlayer.play();
-                    if (verseItemToScroll) verseItemToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
                     globalAudioPlayer.src = audioUrl; 
                     globalAudioPlayer.play().catch(e => console.error("Gagal memutar audio:", e));
                     currentAudioSrc = audioUrl;
                     window.currentPlayingButton = button;
-                    if (verseItemToScroll) verseItemToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 
                 document.querySelectorAll('#surah-detail-content .audio-control-btn.loading').forEach(btn => {
@@ -3350,8 +3392,12 @@ if (manualRefreshBtn) {
                         audio: audioEdition[i].audio 
                     };
 
+                    // [PENTING] Generate ID Unik untuk Scroll (verse-1-1, verse-1-2, dst)
+                    const uniqueId = `verse-${surahNumber}-${i+1}`;
+                    
                     const verseItem = document.createElement('div');
                     verseItem.className = 'verse-item';
+                    verseItem.id = uniqueId; // Pasang ID di sini
                     
                     const verseNumber = document.createElement('div');
                     verseNumber.className = 'verse-number';
@@ -3398,8 +3444,8 @@ if (manualRefreshBtn) {
 
                     if (audioUrl) {
                         playButton.addEventListener('click', () => {
-                            // --- DIPERBARUI: Kirim juga nomor ayat ---
-                            playVerseAudio(playButton, audioUrl, verseData.nomor); 
+                            // --- DIPERBARUI: Kirim ID unik untuk scroll ---
+                            playVerseAudio(playButton, audioUrl, verseData.nomor, uniqueId); 
                         });
                     } else {
                         playButton.disabled = true;
@@ -3417,13 +3463,16 @@ if (manualRefreshBtn) {
                         if (span) span.textContent = 'Autoplay: Aktif';
                     }
 
-                    const firstVerse = surahDetailContent.querySelector('.verse-item');
-                    if (firstVerse) {
-                        const firstPlayButton = firstVerse.querySelector('.audio-control-btn');
-                        if (firstPlayButton && !firstPlayButton.disabled) {
-                            setTimeout(() => firstPlayButton.click(), 100); 
+                    // [DELAY LEBIH LAMA] Beri waktu 1.5 detik agar UI selesai render sebelum auto-play
+                    setTimeout(() => {
+                        const firstVerse = surahDetailContent.querySelector('.verse-item');
+                        if (firstVerse) {
+                            const firstPlayButton = firstVerse.querySelector('.audio-control-btn');
+                            if (firstPlayButton && !firstPlayButton.disabled) {
+                                firstPlayButton.click(); 
+                            }
                         }
-                    }
+                    }, 1500);
                 }
                 
             } catch (error) {
@@ -3470,19 +3519,10 @@ if (manualRefreshBtn) {
      */
     function checkAndPlayAdzan() {
         // Biarkan kosong atau hapus logika interval lama.
-        // Karena sekarang kita menggunakan AlarmManager Android,
-        // kita tidak perlu mengecek setiap menit di JavaScript.
-        
-        // Namun, kita tetap bisa membiarkan ini untuk update UI jika perlu.
-        // Tapi fungsi utamanya sudah digantikan oleh schedulePrayerAlarm di updatePrayerUI.
     }
     
-    // Kita tidak perlu interval ini lagi untuk memutar suara,
-    // tapi mungkin berguna untuk me-refresh tampilan waktu sholat (jika hari berganti).
-    // Jadi biarkan saja atau ubah intervalnya menjadi lebih lama (misal 1 jam).
     setInterval(() => {
        // Cek apakah hari sudah berganti, jika ya, fetch ulang jadwal
-       // Tapi untuk sekarang, biarkan saja.
     }, 3600000);
     
     // --- DAFTARKAN SERVICE WORKER (OFFLINE MODE) ---
@@ -3495,4 +3535,4 @@ if (manualRefreshBtn) {
     }
 </script>
 </body>
-    </html>
+</html> 
