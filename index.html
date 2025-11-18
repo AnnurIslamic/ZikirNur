@@ -1750,21 +1750,44 @@ body {
 
 <script>
 
-// --- LOGIKA TOGGLE POP-UP (MUNCUL DI ATAS) ---
-    const popupToggle = document.getElementById('popup-toggle');
+// --- LOGIKA TOGGLE POP-UP (SINKRONISASI OTOMATIS) ---
     
-    // 1. Saat Aplikasi Dibuka: Cek apakah izin sudah ada di HP?
-    // Jika sudah diizinkan di pengaturan HP, tombol otomatis jadi ON (Biru).
-    if (popupToggle && window.Android && typeof window.Android.checkOverlayPermission === 'function') {
-        const isGranted = window.Android.checkOverlayPermission();
-        popupToggle.checked = isGranted;
+    // Fungsi untuk mengecek status izin ke Android
+    function syncOverlayPermission() {
+        const popupToggle = document.getElementById('popup-toggle');
+        
+        // Cek apakah elemen ada dan apakah kita berada di dalam aplikasi Android
+        if (popupToggle && window.Android && typeof window.Android.checkOverlayPermission === 'function') {
+            // Tanya ke Android: "Apakah izin sudah diberikan?"
+            const isGranted = window.Android.checkOverlayPermission();
+            
+            // Ubah tampilan tombol sesuai jawaban Android
+            // Jika isGranted = true, tombol jadi Biru (ON). Jika false, jadi mati (OFF).
+            popupToggle.checked = isGranted; 
+            
+            console.log("Sinkronisasi Izin Pop-Up: " + (isGranted ? "DIIZINKAN" : "DITOLAK"));
+        }
     }
 
-    // 2. Saat User Klik Tombol
-    if (popupToggle) {
-        popupToggle.addEventListener('change', (e) => {
+    // 1. Jalankan saat aplikasi pertama kali dibuka
+    document.addEventListener('DOMContentLoaded', syncOverlayPermission);
+
+    // 2. [PENTING] Jalankan saat user KEMBALI dari Pengaturan HP (agar tombol otomatis biru)
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            syncOverlayPermission();
+        }
+    });
+    // Cadangan untuk browser lama
+    window.addEventListener("focus", syncOverlayPermission);
+
+    // 3. Event Listener saat tombol diklik manual oleh user
+    const popupToggleBtn = document.getElementById('popup-toggle');
+    
+    if (popupToggleBtn) {
+        popupToggleBtn.addEventListener('change', (e) => {
+            // KASUS A: User MENYALAKAN Tombol (Klik jadi ON)
             if (e.target.checked) {
-                // KASUS: User Menghidupkan Tombol
                 if (window.Android && typeof window.Android.requestOverlayPermission === 'function') {
                     
                     // Cek lagi ke sistem Android
@@ -1776,18 +1799,32 @@ body {
                         window.Android.requestOverlayPermission();
                         
                         // 2. Matikan dulu tombolnya secara visual
-                        // Supaya user menyalakan lagi nanti setelah balik dari pengaturan
+                        // Supaya user menyalakan lagi nanti setelah balik dari pengaturan (otomatis oleh syncOverlayPermission)
                         e.target.checked = false; 
                     }
                 } else {
-                    // Jika dibuka di Browser biasa (bukan aplikasi Android)
+                    // KASUS: Dibuka di Browser Biasa (Bukan Android App)
                     alert("Fitur ini hanya jalan di Aplikasi Android.");
-                    e.target.checked = false;
+                    e.target.checked = false; // Matikan tombolnya kembali
+                }
+            } 
+            // KASUS B: User MEMATIKAN Tombol (Klik jadi OFF)
+            else {
+                if (window.Android && typeof window.Android.requestOverlayPermission === 'function') {
+                     // Di Android, kita tidak bisa mencabut izin secara otomatis lewat kode.
+                     // Kita beri tahu user cara mematikannya.
+                     alert("Untuk mematikan fitur ini sepenuhnya, harap matikan izin 'Muncul di atas' di pengaturan HP secara manual.");
                 }
             }
-            // KASUS: User Mematikan Tombol (Biarkan saja mati visualnya)
         });
     }
+
+    // 4. Mematikan Klik Kanan (Perlindungan Konten)
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        // Opsi: Tampilkan alert jika mau
+        // alert("Klik kanan dimatikan untuk melindungi konten."); 
+    });
 
     // 1. Mematikan Klik Kanan
     document.addEventListener('contextmenu', function(e) {
@@ -3439,4 +3476,4 @@ if (manualRefreshBtn) {
     }, 3600000);
 </script>
 </body>
-                                                                                </html>
+</html>
