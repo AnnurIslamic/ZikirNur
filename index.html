@@ -1193,7 +1193,7 @@ body {
 
             <div class="featured-zikir-container">
                 <div class="zikir-card pagi">
-                    <audio id="audio-pagi" src="dzikirpagi.mp3"></audio>
+
                     <i class="fas fa-sun" aria-hidden="true"></i>
                     <h4>Dzikir Pagi</h4>
                     <p class="subtitle">Ba'da Subuh</p>
@@ -1205,7 +1205,7 @@ body {
                     </div>
                 </div>
                 <div class="zikir-card petang">
-                    <audio id="audio-petang" src="Dzikirpetang.mp3"></audio>
+
                     <i class="fas fa-moon" aria-hidden="true"></i>
                     <h4>Dzikir Petang</h4>
                     <p class="subtitle">Ba'da Ashar</p>
@@ -2581,91 +2581,58 @@ if (manualRefreshBtn) {
         }
     }
 
-    // --- Logika Audio Player Dashboard ---
-
+// --- Logika Audio Player Dashboard (VERSI NATIVE / OFFLINE) ---
     function initDashboardAudio(elements) {
-        const allAudios = document.querySelectorAll('audio#audio-pagi, audio#audio-petang');
         const audioContainer = document.querySelector('.featured-zikir-container');
-        
-        function stopAllAudios(exceptAudio){
-            allAudios.forEach(audio => {
-                if(audio !== exceptAudio){
-                    audio.pause();
-                    audio.currentTime = 0;
-                }
-            });
-            if (globalAudioPlayer && !globalAudioPlayer.paused && exceptAudio !== globalAudioPlayer) {
-                globalAudioPlayer.pause();
-                if(window.currentPlayingButton) {
-                    window.currentPlayingButton.classList.remove('playing');
-                    window.currentPlayingButton = null;
-                }
-            }
-        }
-        
-        function resetAllPlayersUI(exceptContainer){
+
+        // Fungsi Global untuk dipanggil Android jika audio selesai sendiri
+        window.resetDzikirButtons = function() {
             document.querySelectorAll('.audio-controls-container').forEach(container => {
-                if(container !== exceptContainer){
-                    container.querySelector('.play-btn').classList.remove('hidden');
-                    container.querySelector('.pause-btn').classList.add('hidden');
-                    container.querySelector('.stop-btn').classList.add('hidden');
-                }
+                container.querySelector('.play-btn').classList.remove('hidden');
+                container.querySelector('.pause-btn').classList.add('hidden');
+                container.querySelector('.stop-btn').classList.add('hidden');
             });
-        }
-        
-        if(audioContainer) {
+        };
+
+        if (audioContainer) {
             audioContainer.addEventListener('click', (e) => {
                 const playBtn = e.target.closest('.play-btn');
-                const pauseBtn = e.target.closest('.pause-btn');
                 const stopBtn = e.target.closest('.stop-btn');
                 
-                if(playBtn){
-                    const targetId = playBtn.dataset.target;
-                    const audio = document.getElementById(targetId);
-                    if(!audio) return;
+                // === TOMBOL PLAY ===
+                if (playBtn) {
+                    // Ambil tipe: 'pagi' atau 'petang' dari data-target="audio-pagi"
+                    const targetType = playBtn.dataset.target.replace('audio-', ''); 
                     const container = playBtn.parentElement;
-                    
-                    stopAllAudios(audio);
-                    resetAllPlayersUI(container);
-                    
-                    audio.play();
+
+                    // 1. Reset tampilan tombol lain (biar gak tabrakan)
+                    window.resetDzikirButtons();
+
+                    // 2. Panggil Android (Native Player)
+                    if (window.Android && typeof window.Android.playDzikir === 'function') {
+                        window.Android.playDzikir(targetType);
+                    } else {
+                        alert("Fitur Audio ini butuh aplikasi Android.");
+                    }
+
+                    // 3. Ubah tombol ini jadi STOP (Pause kita hilangkan agar simpel)
                     playBtn.classList.add('hidden');
-                    container.querySelector('.pause-btn').classList.remove('hidden');
-                    container.querySelector('.stop-btn').classList.remove('hidden');
+                    container.querySelector('.stop-btn').classList.remove('hidden'); 
                 }
-                
-                if(pauseBtn){
-                    const targetId = pauseBtn.dataset.target;
-                    const audio = document.getElementById(targetId);
-                    if(!audio) return;
-                    const container = pauseBtn.parentElement;
-                    
-                    audio.pause();
-                    pauseBtn.classList.add('hidden');
-                    container.querySelector('.play-btn').classList.remove('hidden');
-                }
-                
-                if(stopBtn){
-                    const targetId = stopBtn.dataset.target;
-                    const audio = document.getElementById(targetId);
-                    if(!audio) return;
+
+                // === TOMBOL STOP ===
+                if (stopBtn) {
                     const container = stopBtn.parentElement;
-                    
-                    audio.pause();
-                    audio.currentTime = 0;
+
+                    // 1. Panggil Android untuk matikan suara
+                    if (window.Android && typeof window.Android.stopDzikir === 'function') {
+                        window.Android.stopDzikir();
+                    }
+
+                    // 2. Kembalikan tombol jadi PLAY
                     stopBtn.classList.add('hidden');
-                    container.querySelector('.pause-btn').classList.add('hidden');
                     container.querySelector('.play-btn').classList.remove('hidden');
                 }
-            });
-            
-            allAudios.forEach(audio => {
-                audio.addEventListener ('ended', () => {
-                    const container = document.querySelector(`.play-btn[data-target="${audio.id}"]`).parentElement;
-                    container.querySelector('.play-btn').classList.remove('hidden');
-                    container.querySelector('.pause-btn').classList.add('hidden');
-                    container.querySelector('.stop-btn').classList.add('hidden');
-                   });
             });
         }
     }
@@ -3473,4 +3440,4 @@ if (manualRefreshBtn) {
     }
 </script>
 </body>
-                                </html>
+</html>
