@@ -1790,7 +1790,6 @@ body {
                         // Jangan matikan tombol di sini, biarkan syncOverlayPermission yang mengurusnya saat user kembali
                     }
                 } else {
-                    // [BAGIAN INI YANG TADI HILANG]
                     // Jika dibuka di Browser biasa (Bukan Android App)
                     alert("Fitur ini hanya berfungsi di dalam Aplikasi Android.");
                     e.target.checked = false; // Matikan lagi tombolnya
@@ -1799,20 +1798,13 @@ body {
             // KASUS 2: User MEMATIKAN Tombol
             else {
                 if (window.Android && typeof window.Android.requestOverlayPermission === 'function') {
-                     alert("Untuk mematikan fitur ini sepenuhnya, harap matikan izin 'Muncul di atas' di pengaturan HP secara manual.");
-                     // Kita bisa arahkan ke pengaturan lagi jika mau:
-                     // window.Android.requestOverlayPermission();
+                      alert("Untuk mematikan fitur ini sepenuhnya, harap matikan izin 'Muncul di atas' di pengaturan HP secara manual.");
+                      // Kita bisa arahkan ke pengaturan lagi jika mau:
+                      // window.Android.requestOverlayPermission();
                 }
             }
         });
     }
-
-    // 4. Mematikan Klik Kanan (Perlindungan Konten)
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        // Opsi: Tampilkan alert jika mau
-        // alert("Klik kanan dimatikan untuk melindungi konten."); 
-    });
 
     // 1. Mematikan Klik Kanan
     document.addEventListener('contextmenu', function(e) {
@@ -1846,6 +1838,41 @@ body {
         }
     };
 
+
+    // --- [BARU] CALLBACK DARI ANDROID SERVICE ---
+    // Fungsi ini akan dipanggil oleh AndroidService ketika ayat selesai diputar
+    window.onAudioFinished = function() {
+        console.log("Audio selesai dari Android Service");
+        
+        // Matikan animasi loading/playing di tombol sekarang
+        if (window.currentPlayingButton) {
+            window.currentPlayingButton.classList.remove('playing');
+            window.currentPlayingButton.classList.remove('loading');
+        }
+
+        // Logika Autoplay Quran (Lanjut ke ayat berikutnya)
+        if (isQuranAutoplayActive && window.currentPlayingButton) {
+            const currentVerseItem = window.currentPlayingButton.closest('.verse-item');
+            if (currentVerseItem) {
+                let nextVerseItem = currentVerseItem.nextElementSibling;
+                if (nextVerseItem && nextVerseItem.classList.contains('verse-item')) {
+                    const nextPlayButton = nextVerseItem.querySelector('.audio-control-btn');
+                    if (nextPlayButton) {
+                        // Klik otomatis tombol berikutnya
+                        nextPlayButton.click(); 
+                    }
+                } else {
+                    // Opsi: Lanjut ke surat berikutnya jika mau
+                     console.log("Akhir surat tercapai.");
+                }
+            }
+        }
+        
+        // Logika Reset Tombol Dzikir (jika yang selesai adalah dzikir dashboard)
+        if(typeof window.resetDzikirButtons === 'function') {
+            window.resetDzikirButtons();
+        }
+    };
 
 
     // --- Deklarasi Variabel Global ---
@@ -2192,28 +2219,24 @@ body {
             });
         }
 
-        // ... kode JavaScript sebelumnya ...
+        // --- [BARU] LOGIKA TOMBOL PENGATURAN SISTEM ---
+        const openSettingsBtn = document.getElementById('open-system-settings-btn');
+        
+        if (openSettingsBtn) {
+            openSettingsBtn.addEventListener('click', () => {
+                if (window.Android && typeof window.Android.openAppSettings === 'function') {
+                    // Panggil fungsi Kotlin yang baru kita buat
+                    window.Android.openAppSettings();
+                } else {
+                    // Fallback jika bukan di Android
+                    alert("Fitur ini hanya berfungsi di aplikasi Android untuk membuka pengaturan izin.");
+                }
+            });
+        }
 
-    // --- [BARU] LOGIKA TOMBOL PENGATURAN SISTEM ---
-    const openSettingsBtn = document.getElementById('open-system-settings-btn');
-    
-    if (openSettingsBtn) {
-        openSettingsBtn.addEventListener('click', () => {
-            if (window.Android && typeof window.Android.openAppSettings === 'function') {
-                // Panggil fungsi Kotlin yang baru kita buat
-                window.Android.openAppSettings();
-            } else {
-                // Fallback jika bukan di Android
-                alert("Fitur ini hanya berfungsi di aplikasi Android untuk membuka pengaturan izin.");
-            }
-        });
-    }
-
-    // ... kode JavaScript lainnya ...
 
         // ... (Logika Location Toggle biarkan sama seperti sebelumnya) ...
         if(locationToggle) {
-             // ... copy logika locationToggle yang lama ...
              const locPerm = localStorage.getItem('locationAccess');
              locationToggle.checked = (locPerm === 'granted');
              locationToggle.addEventListener('change', (e) => {
@@ -3127,39 +3150,59 @@ if (manualRefreshBtn) {
             });
         }
         
-        function playVerseAudio(button, audioUrl) {
+        // --- [DIPERBARUI] LOGIKA PEMUTAR AUDIO UTAMA (BRIDGE SUPPORT) ---
+        function playVerseAudio(button, audioUrl, verseNumber) { 
+            // 1. Matikan Audio Dashboard (Pagi/Petang) jika sedang jalan
             document.querySelectorAll('audio#audio-pagi, audio#audio-petang').forEach(audio => {
                 audio.pause();
                 audio.currentTime = 0;
             });
-            document.querySelectorAll('.featured-zikir-container .audio-controls-container').forEach(container => {
-                container.querySelector('.play-btn').classList.remove('hidden');
-                container.querySelector('.pause-btn').classList.add('hidden');
-                container.querySelector('.stop-btn').classList.add('hidden');
-            });
+            // Reset tombol dashboard
+            if(typeof window.resetDzikirButtons === 'function') window.resetDzikirButtons();
 
+            // 2. Reset tombol ayat lain yang mungkin sedang "playing"
             if (window.currentPlayingButton && window.currentPlayingButton !== button) {
                 window.currentPlayingButton.classList.remove('playing');
+                window.currentPlayingButton.classList.remove('loading');
             }
 
-            const verseItemToScroll = button.closest('.verse-item');
-
-            if (window.currentPlayingButton === button && !globalAudioPlayer.paused) {
-                globalAudioPlayer.pause();
-            } else if (window.currentPlayingButton === button && globalAudioPlayer.paused) {
-                globalAudioPlayer.play();
-                if (verseItemToScroll) verseItemToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // 3. Cek apakah Android Bridge tersedia?
+            if (window.Android && typeof window.Android.playAudio === 'function') {
+                 // --- JALUR ANDROID SERVICE (NATIVE) ---
+                 
+                 // Ambil Judul Surat
+                 const surahTitle = document.getElementById('surah-detail-title').textContent;
+                 
+                 // Panggil Service Android
+                 // Parameter: URL, Judul (misal: Al-Fatihah), Deskripsi (Ayat 1)
+                 window.Android.playAudio(audioUrl, surahTitle, "Ayat " + verseNumber); 
+                 
+                 // Set state button jadi loading (sampai service merespon playing/selesai)
+                 window.currentPlayingButton = button;
+                 button.classList.add('loading'); 
+                 
             } else {
-                globalAudioPlayer.src = audioUrl; 
-                globalAudioPlayer.play().catch(e => console.error("Gagal memutar audio:", e));
-                currentAudioSrc = audioUrl;
-                window.currentPlayingButton = button;
-                if (verseItemToScroll) verseItemToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // --- JALUR BROWSER BIASA (FALLBACK) ---
+                
+                const verseItemToScroll = button.closest('.verse-item');
+
+                if (window.currentPlayingButton === button && !globalAudioPlayer.paused) {
+                    globalAudioPlayer.pause();
+                } else if (window.currentPlayingButton === button && globalAudioPlayer.paused) {
+                    globalAudioPlayer.play();
+                    if (verseItemToScroll) verseItemToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    globalAudioPlayer.src = audioUrl; 
+                    globalAudioPlayer.play().catch(e => console.error("Gagal memutar audio:", e));
+                    currentAudioSrc = audioUrl;
+                    window.currentPlayingButton = button;
+                    if (verseItemToScroll) verseItemToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                document.querySelectorAll('#surah-detail-content .audio-control-btn.loading').forEach(btn => {
+                    if(btn !== button) btn.classList.remove('loading');
+                });
             }
-            
-            document.querySelectorAll('#surah-detail-content .audio-control-btn.loading').forEach(btn => {
-                if(btn !== button) btn.classList.remove('loading');
-            });
         }
 
         // --- Logika Render (Membuat Tampilan) ---
@@ -3355,7 +3398,8 @@ if (manualRefreshBtn) {
 
                     if (audioUrl) {
                         playButton.addEventListener('click', () => {
-                            playVerseAudio(playButton, audioUrl); 
+                            // --- DIPERBARUI: Kirim juga nomor ayat ---
+                            playVerseAudio(playButton, audioUrl, verseData.nomor); 
                         });
                     } else {
                         playButton.disabled = true;
@@ -3451,4 +3495,4 @@ if (manualRefreshBtn) {
     }
 </script>
 </body>
-</html>
+    </html>
