@@ -1615,6 +1615,20 @@ body {
     </button>
     <small id="refresh-status-text" style="display: block; text-align: center; font-size: 0.75rem; color: var(--primary-color); margin-top: 5px; height: 1rem;"></small>
 </li>
+<li class="settings-item" style="display: block;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <div class="setting-label" style="font-weight: 700;">Izinkan Pop Up Alarm</div>
+            <small style="font-size: 0.8rem; color: var(--icon-color); line-height: 1.3;">
+                Layar Azan akan muncul saat alarm berbunyi di atas aplikasi lain.
+            </small>
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="popup-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+</li>
                     
                     <li class="settings-item">
                         <div class="setting-label">Notifikasi Adzan</div>
@@ -1735,6 +1749,45 @@ body {
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <script>
+
+// --- LOGIKA TOGGLE POP-UP (MUNCUL DI ATAS) ---
+    const popupToggle = document.getElementById('popup-toggle');
+    
+    // 1. Saat Aplikasi Dibuka: Cek apakah izin sudah ada di HP?
+    // Jika sudah diizinkan di pengaturan HP, tombol otomatis jadi ON (Biru).
+    if (popupToggle && window.Android && typeof window.Android.checkOverlayPermission === 'function') {
+        const isGranted = window.Android.checkOverlayPermission();
+        popupToggle.checked = isGranted;
+    }
+
+    // 2. Saat User Klik Tombol
+    if (popupToggle) {
+        popupToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                // KASUS: User Menghidupkan Tombol
+                if (window.Android && typeof window.Android.requestOverlayPermission === 'function') {
+                    
+                    // Cek lagi ke sistem Android
+                    const isGranted = window.Android.checkOverlayPermission();
+                    
+                    if (!isGranted) {
+                        // JIKA BELUM DIIZINKAN:
+                        // 1. Buka Pengaturan HP "Muncul di atas aplikasi lain"
+                        window.Android.requestOverlayPermission();
+                        
+                        // 2. Matikan dulu tombolnya secara visual
+                        // Supaya user menyalakan lagi nanti setelah balik dari pengaturan
+                        e.target.checked = false; 
+                    }
+                } else {
+                    // Jika dibuka di Browser biasa (bukan aplikasi Android)
+                    alert("Fitur ini hanya jalan di Aplikasi Android.");
+                    e.target.checked = false;
+                }
+            }
+            // KASUS: User Mematikan Tombol (Biarkan saja mati visualnya)
+        });
+    }
 
     // 1. Mematikan Klik Kanan
     document.addEventListener('contextmenu', function(e) {
@@ -3386,4 +3439,4 @@ if (manualRefreshBtn) {
     }, 3600000);
 </script>
 </body>
-    </html>
+                                                                                </html>
