@@ -1756,64 +1756,52 @@ body {
     function syncOverlayPermission() {
         const popupToggle = document.getElementById('popup-toggle');
         
-        // Cek apakah elemen ada dan apakah kita berada di dalam aplikasi Android
+        // Hanya jalan jika ada di dalam Aplikasi Android
         if (popupToggle && window.Android && typeof window.Android.checkOverlayPermission === 'function') {
-            // Tanya ke Android: "Apakah izin sudah diberikan?"
             const isGranted = window.Android.checkOverlayPermission();
-            
-            // Ubah tampilan tombol sesuai jawaban Android
-            // Jika isGranted = true, tombol jadi Biru (ON). Jika false, jadi mati (OFF).
             popupToggle.checked = isGranted; 
-            
             console.log("Sinkronisasi Izin Pop-Up: " + (isGranted ? "DIIZINKAN" : "DITOLAK"));
         }
     }
 
-    // 1. Jalankan saat aplikasi pertama kali dibuka
+    // A. Jalankan saat aplikasi pertama kali dibuka
     document.addEventListener('DOMContentLoaded', syncOverlayPermission);
 
-    // 2. [PENTING] Jalankan saat user KEMBALI dari Pengaturan HP (agar tombol otomatis biru)
+    // B. Jalankan saat user KEMBALI dari Pengaturan HP (PENTING)
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
             syncOverlayPermission();
         }
     });
-    // Cadangan untuk browser lama
     window.addEventListener("focus", syncOverlayPermission);
 
-    // 3. Event Listener saat tombol diklik manual oleh user
+    // C. Event Listener saat tombol diklik manual oleh user
     const popupToggleBtn = document.getElementById('popup-toggle');
-    
     if (popupToggleBtn) {
         popupToggleBtn.addEventListener('change', (e) => {
-            // KASUS A: User MENYALAKAN Tombol (Klik jadi ON)
+            // KASUS 1: User MENYALAKAN Tombol
             if (e.target.checked) {
                 if (window.Android && typeof window.Android.requestOverlayPermission === 'function') {
-                    
-                    // Cek lagi ke sistem Android
                     const isGranted = window.Android.checkOverlayPermission();
                     
                     if (!isGranted) {
-                        // JIKA BELUM DIIZINKAN:
-                        // 1. Buka Pengaturan HP "Muncul di atas aplikasi lain"
+                        // Buka Pengaturan HP
                         window.Android.requestOverlayPermission();
-                        
-                        // 2. Matikan dulu tombolnya secara visual
-                        // Supaya user menyalakan lagi nanti setelah balik dari pengaturan (otomatis oleh syncOverlayPermission)
-                        e.target.checked = false; 
+                        // Jangan matikan tombol di sini, biarkan syncOverlayPermission yang mengurusnya saat user kembali
                     }
                 } else {
-                    // KASUS: Dibuka di Browser Biasa (Bukan Android App)
-                    alert("Fitur ini hanya jalan di Aplikasi Android.");
-                    e.target.checked = false; // Matikan tombolnya kembali
+                    // [BAGIAN INI YANG TADI HILANG]
+                    // Jika dibuka di Browser biasa (Bukan Android App)
+                    alert("Fitur ini hanya berfungsi di dalam Aplikasi Android.");
+                    e.target.checked = false; // Matikan lagi tombolnya
                 }
             } 
-            // KASUS B: User MEMATIKAN Tombol (Klik jadi OFF)
+            // KASUS 2: User MEMATIKAN Tombol
             else {
                 if (window.Android && typeof window.Android.requestOverlayPermission === 'function') {
-                     // Di Android, kita tidak bisa mencabut izin secara otomatis lewat kode.
-                     // Kita beri tahu user cara mematikannya.
                      alert("Untuk mematikan fitur ini sepenuhnya, harap matikan izin 'Muncul di atas' di pengaturan HP secara manual.");
+                     // Kita bisa arahkan ke pengaturan lagi jika mau:
+                     // window.Android.requestOverlayPermission();
                 }
             }
         });
