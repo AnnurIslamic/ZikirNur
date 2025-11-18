@@ -1,78 +1,86 @@
-const STATIC_CACHE_NAME = 'zikirnur-static-v3'; // Cache untuk Aset Tetap
-const DATA_CACHE_NAME = 'zikirnur-data-v3';     // Cache untuk API (Quran/Jadwal)
+const CACHE_NAME = 'zikirnur-v1';
 
-// DAFTAR FILE YANG WAJIB DISIMPAN PERMANEN (Pre-Cache)
-const FILES_TO_CACHE = [
-  './',
-  './index.html',
-  './dzikirpagi.mp3',     // Audio Dzikir Pagi (Wajib ada di folder project)
-  './Dzikirpetang.mp3',   // Audio Dzikir Petang (Wajib ada di folder project)
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css', // Icon
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&display=swap' // Font
+// Aset statis (HTML, CSS, Manifest)
+const STATIC_ASSETS = [
+    './',
+    './index.html',
+    './manifest.json',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
+    'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&display=swap'
 ];
 
-// 1. SAAT INSTALL: Download & Simpan Semua File Penting Sekaligus
+// 1. Install: Simpan aset dasar
 self.addEventListener('install', (event) => {
-  console.log('[ServiceWorker] Install & Pre-cache');
-  event.waitUntil(
-    caches.open(STATIC_CACHE_NAME).then((cache) => {
-      console.log('[ServiceWorker] Menyimpan Aset Utama (HTML & MP3)...');
-      return cache.addAll(FILES_TO_CACHE);
-    })
-  );
-  self.skipWaiting(); // Langsung aktifkan SW baru tanpa nunggu tutup browser
-});
-
-// 2. SAAT AKTIF: Bersihkan Cache Versi Lama (Supaya tidak penuh)
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(keyList.map((key) => {
-        if (key !== STATIC_CACHE_NAME && key !== DATA_CACHE_NAME) {
-          console.log('[ServiceWorker] Hapus cache lama', key);
-          return caches.delete(key);
-        }
-      }));
-    })
-  );
-  self.clients.claim();
-});
-
-// 3. SAAT FETCH: Strategi "Cache First" (Prioritas Offline)
-self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
-
-  // A. Strategi untuk API (Al-Qur'an & Jadwal Sholat)
-  // Coba ambil online dulu agar data update, kalau gagal (offline) baru ambil cache.
-  if (requestUrl.href.includes('api.alquran.cloud') || requestUrl.href.includes('api.aladhan.com') || requestUrl.href.includes('quran-api.santrikoding.com')) {
-    event.respondWith(
-      caches.open(DATA_CACHE_NAME).then((cache) => {
-        return fetch(event.request)
-          .then((response) => {
-            // Jika online berhasil, simpan data terbaru ke cache
-            if (response.status === 200) {
-              cache.put(event.request.url, response.clone());
-            }
-            return response;
-          })
-          .catch(() => {
-            // Jika OFFLINE, ambil dari cache yang tersimpan
-            return cache.match(event.request);
-          });
-      })
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            console.log('[SW] Caching Static Assets');
+            return cache.addAll(STATIC_ASSETS);
+        })
     );
-    return;
-  }
+    self.skipWaiting();
+});
 
-  // B. Strategi untuk Aset Tetap (HTML, MP3, CSS) -> "Cache First"
-  // Cek memori HP dulu. Jika ada, langsung pakai (Super Cepat & Offline).
-  // Jika tidak ada, baru download.
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        return response; // File ditemukan di cache!
-      }
-      return fetch(event.request); // Gak ada di cache, download dari internet
-    })
-  );
+// 2. Activate: Hapus cache lama
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((keyList) => {
+            return Promise.all(keyList.map((key) => {
+                if (key !== CACHE_NAME) {
+                    return caches.delete(key);
+                }
+            }));
+        })
+    );
+    self.clients.claim();
+});
+
+// 3. Fetch: Strategi Caching Pintar
+self.addEventListener('fetch', (event) => {
+    const requestUrl = new URL(event.request.url);
+
+    // A. KHUSUS API QURAN (Simpan JSON text agar bisa offline)
+    // Kita gunakan strategi: Stale-While-Revalidate (Pakai cache dulu, lalu update di background)
+    // ATAU Cache-First (karena teks Quran tidak berubah). Kita pakai Cache-First agar cepat.
+    if (requestUrl.href.includes('api.alquran.cloud')) {
+        
+        // Jangan cache file audio MP3, terlalu besar
+        if (requestUrl.href.includes('.mp3') || requestUrl.href.includes('audio')) {
+            return; // Langsung ke internet
+        }
+
+        event.respondWith(
+            caches.open(CACHE_NAME).then((cache) => {
+                return cache.match(event.request).then((response) => {
+                    // Jika ada di cache, kembalikan
+                    if (response) {
+                        return response;
+                    }
+                    // Jika tidak, ambil dari internet lalu simpan
+                    return fetch(event.request).then((networkResponse) => {
+                        cache.put(event.request, networkResponse.clone());
+                        return networkResponse;
+                    });
+                });
+            })
+        );
+        return;
+    }
+
+    // B. API Jadwal Sholat (Network First)
+    // Data berubah tiap hari/lokasi, jadi utamakan internet.
+    if (requestUrl.href.includes('api.aladhan.com')) {
+        event.respondWith(
+            fetch(event.request).catch(() => {
+                return caches.match(event.request);
+            })
+        );
+        return;
+    }
+
+    // C. Default (Aset statis lainnya)
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            return response || fetch(event.request);
+        })
+    );
 });
